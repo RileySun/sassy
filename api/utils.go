@@ -1,4 +1,4 @@
-package main
+package api
 
 import(
 	"log"
@@ -21,7 +21,7 @@ type Credentials struct {
 
 //Actions
 func LoadCredentials() *Credentials {
-	jsonData := getFile("RAW/config.json")
+	jsonData := getFile("assets/config.json")
 	
 	var creds *Credentials
 	jsonErr := json.Unmarshal(jsonData, &creds)
@@ -33,7 +33,7 @@ func LoadCredentials() *Credentials {
 }
 
 //Files
-//go:embed RAW
+//go:embed assets
 var rawFolder embed.FS
 
 func getFile(path string) []byte {
