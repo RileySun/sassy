@@ -20,7 +20,6 @@ func NewAPI() *API {
 	}
 }
 
-
 //Model
 func (a *API) GetModelBy(column string, identifier any) *Model {
 	//Get Data

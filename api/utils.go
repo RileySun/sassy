@@ -1,6 +1,8 @@
 package api
 
 import(
+	"os"
+
 	"log"
 	"bytes"
 	"embed"
@@ -30,6 +32,28 @@ func LoadCredentials() *Credentials {
 	}
 	
 	return creds
+}
+
+func LoadKeys() map[string]string {
+	jsonData := getFile("assets/keys.json")
+	
+	var keys map[string]string
+	jsonErr := json.Unmarshal(jsonData, &keys)
+	if jsonErr != nil {
+		log.Fatal(jsonErr)
+	}
+	
+	return keys
+}
+
+//TEMPORARY DONT JUMP DOWN MY THROAT
+func saveKeys(newKeys map[string]string) {
+	json, err := json.MarshalIndent(newKeys, "", "	")
+	if err != nil {
+		log.Fatal("saveData - ", err)
+	}
+	path := "./keys.json"
+	os.WriteFile(path, json, 0755);
 }
 
 //Files
