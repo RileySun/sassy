@@ -1,15 +1,12 @@
 package main
 
 import(
-	"fmt"
+	//"fmt"
 
 	"api"
 )
 
 func main() {
-	auth := api.NewAuth()
+	_ = api.NewAuth()
 	
-	keys := api.LoadKeys()
-	fmt.Println(auth.IsValidKey(keys["RILEY"]))
-	auth.GenerateToken()
 }

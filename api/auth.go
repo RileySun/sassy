@@ -1,47 +1,57 @@
 package api
 
 import(
-	//"fmt"
-	"crypto/sha256"
+	"log"
+	"fmt"
+	"errors"
+	"context"
 	
-	"github.com/google/uuid"
+	openbao "github.com/openbao/openbao/api/v2"
 )
 
 //Struct
-type Authenticator struct {
-	reverseKeyIndex map[string]string
+type Auth struct {
+	baoClient *openbao.Client
 }
 
 //Create
-func NewAuth() *Authenticator {
-	auth := &Authenticator{}
+func NewAuth() *Auth {
+	auth := &Auth{}
 	
-	keyStorage := LoadKeys()
-	auth.reverseKeyIndex = make(map[string]string)
-	for name, key := range keyStorage {
-       auth.reverseKeyIndex[key] = name
-    }
+	//Credentials
+	creds := LoadCredentials()	
+	
+	//Openbao
+	config := openbao.DefaultConfig()
+	config.Address = creds.OHost
+	var err error
+	auth.baoClient, err = openbao.NewClient(config)
+	if err != nil {
+	    log.Fatalf("OpenBao Client Init Error: %v", err)
+	}
+	auth.baoClient.SetToken(creds.OToken)
 	
 	return auth
 }
 
-//Private
 
-//Public
-func (a *Authenticator) GenerateToken() string {
-	raw := uuid.New().String()
-	hash := sha256.Sum256([]byte(raw))
-	key := string(hash[:])
-	
-	return key
+//Secret Storage (using openbau)
+func (a *Auth) AddSecret(secretData map[string]interface{}, secretPassword string) error {
+	_, err := a.baoClient.KVv2("secret").Put(context.Background(), secretPassword, secretData)
+	return err
 }
 
-
-func (a *Authenticator) IsValidKey(newKey string) (string, bool) {
-	hash := sha256.Sum256([]byte(newKey))
-    key := string(hash[:])
-    
-    name, found := a.reverseKeyIndex[key]
-    
-    return name, found
+func (a *Auth) GetSecret(secretPassword string) (string, error) {
+	secret, err := a.baoClient.KVv2("secret").Get(context.Background(), secretPassword)
+	if err != nil {
+    	return "", err
+	}
+	
+	value, ok := secret.Data["password"].(string)
+	if !ok {
+		err = errors.New(fmt.Sprintf("Type Assert Error: %T %#v", secret.Data["password"], secret.Data["password"]))
+		return "", err
+	}
+	
+	return value, nil
 }
