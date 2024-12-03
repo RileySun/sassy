@@ -3,3 +3,4 @@ notes
 .DS_Store
 /RAW
 /api/assets
+api/debug.go

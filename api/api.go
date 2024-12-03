@@ -7,6 +7,7 @@ import(
 
 //The actual API isnt as important as using the api, so we're gonna go with a basic one. 
 //Routing to the api will be fake.
+//column parameters in GET functions must include backticks because golang mysql driver is weird
 
 //Object
 type API struct {
@@ -20,10 +21,47 @@ func NewAPI() *API {
 	}
 }
 
+//User
+func (a *API) GetUserBy(column string, identifier any) *User {
+	//Get Data
+	rows, err := a.db.db.Query("SELECT * FROM Users WHERE ? = ?;", column, identifier)
+	if err != nil {
+		log.Println(err, "- API:GetUserBy - Rows")
+	}
+	defer rows.Close()
+	
+	//Extract Data to struct object
+	user := &User{}
+	for rows.Next() {
+		err = rows.Scan(&user.ID, &user.Name, &user.Trial, &user.Get, &user.Add, &user.Update, &user.Delete); 
+		if err != nil {
+			log.Println(fmt.Errorf("User Where %s = %s", column, identifier))
+		}
+    }
+	
+	//If errors return nil, if not return struct object
+	if err = rows.Err(); err != nil {
+		log.Println(err, "- API:GetUserBy - Completion")
+		return nil
+	} else {
+		return user
+	}
+}
+
+func (a *API) UpdateUserQuotas(id int, getQuota string, addQuota string, updateQuota string, deleteQuota string) error {
+	queryString := "UPDATE Users SET `get`=?, `add`=?, `update`=?, `delete`=? WHERE `id` = ?;"	
+	statement, err := a.db.db.Prepare(queryString)
+	 if err != nil {
+        log.Println(err, "- API:UpdateUser")
+    }
+	 _, err = statement.Exec(id, getQuota, addQuota, updateQuota, deleteQuota)
+    return err
+}
+
 //Model
 func (a *API) GetModelBy(column string, identifier any) *Model {
 	//Get Data
-	rows, err := a.db.db.Query("SELECT * FROM Models WHERE `?` = ?;", column, identifier)
+	rows, err := a.db.db.Query("SELECT * FROM Models WHERE ? = ?;", column, identifier)
 	if err != nil {
 		log.Println(err, "- API:GetModelBy - Rows")
 	}

@@ -1,10 +1,11 @@
 package api
 
 import(
-	"log"
 	"fmt"
 	"errors"
 	"context"
+	
+	"github.com/google/uuid"
 	
 	openbao "github.com/openbao/openbao/api/v2"
 )
@@ -15,7 +16,7 @@ type Auth struct {
 }
 
 //Create
-func NewAuth() *Auth {
+func NewAuth() (*Auth, error) {
 	auth := &Auth{}
 	
 	//Credentials
@@ -24,14 +25,21 @@ func NewAuth() *Auth {
 	//Openbao
 	config := openbao.DefaultConfig()
 	config.Address = creds.OHost
+	
 	var err error
 	auth.baoClient, err = openbao.NewClient(config)
 	if err != nil {
-	    log.Fatalf("OpenBao Client Init Error: %v", err)
+	    return nil, err
 	}
+	
 	auth.baoClient.SetToken(creds.OToken)
 	
-	return auth
+	return auth, nil
+}
+
+func NewToken() string {
+	id := uuid.New()
+	return id.String()
 }
 
 
@@ -47,9 +55,9 @@ func (a *Auth) GetSecret(secretPassword string) (string, error) {
     	return "", err
 	}
 	
-	value, ok := secret.Data["password"].(string)
+	value, ok := secret.Data["Key"].(string)
 	if !ok {
-		err = errors.New(fmt.Sprintf("Type Assert Error: %T %#v", secret.Data["password"], secret.Data["password"]))
+		err = errors.New(fmt.Sprintf("Type Assert Error: %T %#v", secret.Data["Key"], secret.Data["Key"]))
 		return "", err
 	}
 	

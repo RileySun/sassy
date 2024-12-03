@@ -1,12 +1,12 @@
 package main
 
 import(
-	//"fmt"
+	"fmt"
 
 	"api"
 )
 
 func main() {
-	_ = api.NewAuth()
-	
+	//auth, err := api.NewAuth()
+	//api.RunDebug(auth)
 }

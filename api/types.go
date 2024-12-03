@@ -1,5 +1,11 @@
 package api
 
+type User struct {
+	ID int		//User Id
+	Name string	//User Name
+	Trial bool		//Is Trial User
+	Get, Add, Update, Delete int64 //Limits
+}
 
 type Model struct {
 	ID int
