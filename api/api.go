@@ -3,6 +3,7 @@ package api
 import(
 	"fmt"
 	"log"
+	"errors"
 )
 
 //The actual API isnt as important as using the api, so we're gonna go with a basic one. 
@@ -48,22 +49,13 @@ func (a *API) GetUserBy(column string, identifier any) *User {
 	}
 }
 
-func (a *API) UpdateUserQuotas(id int, getQuota string, addQuota string, updateQuota string, deleteQuota string) error {
-	queryString := "UPDATE Users SET `get`=?, `add`=?, `update`=?, `delete`=? WHERE `id` = ?;"	
-	statement, err := a.db.db.Prepare(queryString)
-	 if err != nil {
-        log.Println(err, "- API:UpdateUser")
-    }
-	 _, err = statement.Exec(id, getQuota, addQuota, updateQuota, deleteQuota)
-    return err
-}
-
 //Model
-func (a *API) GetModelBy(column string, identifier any) *Model {
+func (a *API) GetModelBy(column string, identifier any) (*Model, error) {
 	//Get Data
 	rows, err := a.db.db.Query("SELECT * FROM Models WHERE ? = ?;", column, identifier)
 	if err != nil {
 		log.Println(err, "- API:GetModelBy - Rows")
+		return nil, errors.New("Error Model/Get")
 	}
 	defer rows.Close()
 	
@@ -79,9 +71,9 @@ func (a *API) GetModelBy(column string, identifier any) *Model {
 	//If errors return nil, if not return struct object
 	if err = rows.Err(); err != nil {
 		log.Println(err, "- API:GetModelBy - Completion")
-		return nil
+		return nil, errors.New("Error Model/Get")
 	} else {
-		return model
+		return model, nil
 	}
 }
 
@@ -114,11 +106,12 @@ func (a *API) DeleteModel(id int) error {
 }
 
 //Images
-func (a *API) GetImagesBy(column string, identifier any) []*Image {
+func (a *API) GetImagesBy(column string, identifier any) ([]*Image, error) {
 	//Get Data
 	rows, err := a.db.db.Query("SELECT * FROM Images WHERE ? = ?;", column, identifier)
 	if err != nil {
 		log.Println(err, "- API:GetImagesBy - Rows")
+		return nil, errors.New("Error Images/Get")
 	}
 	defer rows.Close()
 	
@@ -136,9 +129,9 @@ func (a *API) GetImagesBy(column string, identifier any) []*Image {
 	//If errors return nil, if not return struct object
 	if err = rows.Err(); err != nil {
 		log.Println(err, "- API:GetImagesBy - Completion")
-		return nil
+		return nil, errors.New("Error Images/Get")
 	} else {
-		return images
+		return images, nil
 	}
 }
 
@@ -161,12 +154,22 @@ func (a *API) UpdateImage(id int, model_id int, path string, desc string) error 
     return err
 }
 
+func (a *API) DeleteImage(id int) error {
+	statement, err := a.db.db.Prepare("DELETE FROM Images WHERE `id` = ?;")
+    if err != nil {
+        log.Println(err, "- API:DeleteImage")
+    }
+    _, err = statement.Exec(id)
+    return err
+}
+
 //Videos
-func (a *API) GetVideosBy(column string, identifier any) []*Video {
+func (a *API) GetVideosBy(column string, identifier any) ([]*Video, error) {
 	//Get Data
 	rows, err := a.db.db.Query("SELECT * FROM Videos WHERE ? = ?;", column, identifier)
 	if err != nil {
 		log.Println(err, "- API:GetVideosBy - Rows")
+		return nil, errors.New("Error Videos/Get")
 	}
 	defer rows.Close()
 	
@@ -184,9 +187,9 @@ func (a *API) GetVideosBy(column string, identifier any) []*Video {
 	//If errors return nil, if not return struct object
 	if err = rows.Err(); err != nil {
 		log.Println(err, "- API:GetVideosBy - Completion")
-		return nil
+		return nil, errors.New("Error Videos/Get")
 	} else {
-		return videos
+		return videos, nil
 	}
 }
 
@@ -206,5 +209,14 @@ func (a *API) UpdateVideo(id int, model_id int, path string, desc string) error 
         log.Println(err, "- API:UpdateVideo")
     }
 	 _, err = statement.Exec(model_id, path, desc, id)
+    return err
+}
+
+func (a *API) DeleteVideo(id int) error {
+	statement, err := a.db.db.Prepare("DELETE FROM Videos WHERE `id` = ?;")
+    if err != nil {
+        log.Println(err, "- API:DeleteVideo")
+    }
+    _, err = statement.Exec(id)
     return err
 }
