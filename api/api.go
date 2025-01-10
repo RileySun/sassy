@@ -25,7 +25,8 @@ func NewAPI() *API {
 //User
 func (a *API) GetUserBy(column string, identifier any) *User {
 	//Get Data
-	rows, err := a.db.db.Query("SELECT * FROM Users WHERE ? = ?;", column, identifier)
+	rows, err := a.db.db.Query("SELECT `id`, `name`, `trial`, `get`, `add`, `update`, `delete` FROM Users WHERE ? = ?;", column, identifier)
+	
 	if err != nil {
 		log.Println(err, "- API:GetUserBy - Rows")
 	}

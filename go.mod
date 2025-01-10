@@ -2,8 +2,10 @@ module github.com/RileySun/sassy
 
 go 1.22.4
 
+replace api => ./api
+
 require (
-	api v1.0.0
+	api v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
 )
 
@@ -28,5 +30,3 @@ require (
 	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 )
-
-replace api => ./api

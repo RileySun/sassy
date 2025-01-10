@@ -32,9 +32,6 @@ func (a *API) IsUnderQuota(userID int, actionType string) bool {
 
 func (a *API) AddToQuota(userID int, quotaType string) {
 	user := a.GetUserBy("`id`", userID)
-	if user.Trial != true {
-		return
-	}
 	
 	switch quotaType {
 		case "Get":

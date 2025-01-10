@@ -5,10 +5,37 @@ import(
 	"reflect"
 )
 
+func TestNewUser(t *testing.T) {
+	auth := NewAuth()
+	createErr := auth.NewUser("Tester", "TeStEd", false)
+	if createErr != nil {
+		t.Error(createErr.Error())
+	}
+}
+
+func TestCheckLogin(t *testing.T) {
+	auth := NewAuth()
+	loginErr := auth.CheckLogin("Tester", "TeStEd")
+	if loginErr != nil {
+		t.Error(loginErr.Error())
+	}
+}
+
+func TestDeleteUser(t *testing.T) {
+	auth := NewAuth()
+	deleteErr := auth.DeleteUser("Tester", "TeStEd")
+	if deleteErr != nil {
+		t.Error(deleteErr.Error())
+	}
+}
+
+//Secrets
 func TestSecretManagerConnection(t *testing.T) {
-	_, err := NewAuth()
+	auth := NewAuth()
+	
+	err := auth.NewSecretManager()
 	if err != nil {
-		t.Error("Cannot connect to secret manager")
+		t.Error(err.Error())
 	}
 }
 
@@ -25,7 +52,8 @@ func TestNewToken(t *testing.T) {
 }
 
 func TestAddGetSecret(t *testing.T) {
-	auth, err := NewAuth()
+	auth := NewAuth()
+	err := auth.NewSecretManager()
 	if err != nil {
 		t.Error("Cannot connect to secret manager")
 		t.Fail()
