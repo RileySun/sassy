@@ -2,8 +2,11 @@ package api
 
 import(
 	"fmt"
+	"time"
 	"errors"
+	"slices"
 	"context"
+	"strings"
 	
 	"github.com/google/uuid"
 	
@@ -14,54 +17,179 @@ import(
 
 //Struct
 type Auth struct {
+	db *Database
 	baoClient *openbao.Client
+}
+
+type Token struct {
+	access string
+	refresh string
+	expires time.Time
 }
 
 //Create
 func NewAuth() (*Auth) {
-	auth := &Auth{}
-	
-	
-	
+	auth := &Auth{
+		db:NewDB(),
+	}
+
 	return auth
 }
 
-func NewToken() string {
-	id := uuid.New()
-	return id.String()
+//Token Functions
+func (a *Auth) NewToken(name string, password string) (*Token, error) {
+	loginErr := a.CheckLogin(name, password)
+	if loginErr != nil {
+		return nil, loginErr
+	}
+
+	rawAccess := uuid.New().String()
+	rawRefresh := uuid.New().String()
+	newToken := &Token{
+		access: strings.Replace(rawAccess, "-", "", -1),
+		refresh: strings.Replace(rawRefresh, "-", "", -1),
+		expires: time.Now().Add(time.Second * time.Duration(86400)),
+	}
+	
+	storeErr := a.StoreToken(name, newToken)
+	if storeErr != nil {
+		return nil, storeErr
+	}
+	
+	return newToken, nil
 }
 
-//User Functions
-func (a *Auth) NewUser(name string, password string, trial bool) error {
+func (a *Auth) StoreToken(name string, newToken *Token) error {	
+	statement, prepErr := a.db.db.Prepare("INSERT INTO Tokens (`name`, `access_token`, `refresh_token`, `expires_in`) VALUES (?, ?, ?, ?)")
+	if prepErr != nil {
+		return prepErr
+	}
+	
+	_, stateErr := statement.Exec(name, newToken.access, newToken.refresh, newToken.expires)
+	return stateErr
+}
+
+func (a *Auth) CheckToken(accessToken string) error {
+	//Get Expiration data
+	rows, rowErr := a.db.db.Query("SELECT `expires_in` FROM Tokens WHERE `access_token` = ?;", accessToken)
+	if rowErr != nil {
+		return rowErr
+	}
+	defer rows.Close()
+	
+	var expires time.Time
+	for rows.Next() {
+		rowErr := rows.Scan(expires); 
+		if rowErr != nil {
+			return rowErr
+		}
+    }
+    
+    if completeErr := rows.Err(); completeErr != nil {
+		return completeErr
+	}
+	
+	//Parse Expiration]
+	isValid := time.Now().Before(expires)
+	if isValid {
+		return nil
+	} else {
+		return errors.New("Access token has expired")
+	}
+}
+
+func (a *Auth) GetToken(column string, identifier any) (*Token, error) {
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil, columnErr
+	}
+	
+	//Get Data
+	rows, rowErr := a.db.db.Query("SELECT `access_token`, `refresh_token`, `expires_in` FROM Tokens WHERE `"+column+"` = ?;", column, identifier)
+	if rowErr != nil {
+		return nil, rowErr
+	}
+	defer rows.Close()
+	
+	//Extract Data to struct object
+	token := &Token{}
+	for rows.Next() {
+		rowErr := rows.Scan(&token.access, &token.refresh, &token.expires); 
+		if rowErr != nil {
+			return nil, rowErr
+		}
+    }
+	
+	//Completion Errors
+	if completeErr := rows.Err(); completeErr != nil {
+		return nil, completeErr
+	} else {
+		return token, nil
+	}
+}
+
+func (a *Auth) GenerateToken(refreshToken string) (string, error) {	
+	//Create New Access Token and Expiration
+	rawAccess := uuid.New().String()
+	access := strings.Replace(rawAccess, "-", "", -1)
+	expires := time.Now().Add(time.Second * time.Duration(86400))
+	
+	//Store new token
+	statement, prepErr := a.db.db.Prepare("Update Tokens  SET `access_token` = ?, `expires_in` = ? WHERE `refresh_token` = ?")
+	if prepErr != nil {
+		return "", prepErr
+	}
+	
+	_, stateErr := statement.Exec(access, expires, refreshToken)
+	if stateErr != nil {
+		return "", nil
+	}
+	
+	return access, nil
+} //Generate new access token
+
+func (a *Auth) DeleteToken(refreshToken string) error {
+	//Now Delete
 	db := NewDB()
 	defer db.db.Close()//Close this one
 	
+	statement, prepErr := a.db.db.Prepare("DELETE FROM Tokens WHERE `refresh_token` = ?")
+	if prepErr != nil {
+		return prepErr
+	}
+	
+	_, stateErr := statement.Exec(refreshToken)
+	return stateErr
+}
+
+//User Functions
+func (a *Auth) NewUser(name string, password string, trial bool) error {	
 	//Bcrypt pass
 	pass, passErr := a.HashPassword(password)
 	if passErr != nil {
 		return passErr
 	}
 	
-	statement, prepErr := db.db.Prepare("INSERT INTO Users (`name`, `pass`, `key`, `trial`) VALUES (?, ?, ?, ?)")
+	statement, prepErr := a.db.db.Prepare("INSERT INTO Users (`name`, `pass`, `trial`) VALUES (?, ?, ?)")
 	if prepErr != nil {
 		return prepErr
 	}
 	
-	_, stateErr := statement.Exec(name, pass, NewToken(), trial)
+	_, stateErr := statement.Exec(name, pass, trial)
+	if stateErr != nil {
+		return stateErr
+	}
+	
 	return stateErr
 }
 
 func (a *Auth) DeleteUser(name string, password string) error {
-	//CheckPassword, is this right user?
-	if a.CheckLogin(name, password) != nil {
-		return errors.New("No such user, or password incorrect")
-	} 
-
 	//Now Delete
 	db := NewDB()
 	defer db.db.Close()//Close this one
 	
-	statement, prepErr := db.db.Prepare("DELETE FROM Users WHERE `name` = ?")
+	statement, prepErr := a.db.db.Prepare("DELETE FROM Users WHERE `name` = ?")
 	if prepErr != nil {
 		return prepErr
 	}
@@ -70,12 +198,9 @@ func (a *Auth) DeleteUser(name string, password string) error {
 	return stateErr
 } //Might Delete user if usernames are the same and index is first, maybe we check in user creation so no users with same name...
 
-func (a *Auth) CheckLogin(name string, password string) error {
-	db := NewDB()
-	defer db.db.Close()//Close this one, we wont need it later.
-	
+func (a *Auth) CheckLogin(name string, password string) error {	
 	//Get User by Name
-	rows, rowErr := db.db.Query("SELECT `name`, `pass` FROM Users WHERE `name` = ?;", name)
+	rows, rowErr := a.db.db.Query("SELECT `name`, `pass` FROM Users WHERE `name` = ?;", name)
 	if rowErr != nil {
 		return rowErr
 	}
@@ -155,4 +280,14 @@ func (a *Auth) GetSecret(secretPassword string) (string, error) {
 	}
 	
 	return value, nil
+}
+
+//Util
+func (a *Auth) checkColumnName(column string) error {
+	allowed := []string{"id", "name", "refresh_token", "expires_in"}
+	if slices.Contains(allowed, column) {
+		return nil
+	} else {
+		return errors.New("Disallowed column name, NO SQL INJECTIONS!")
+	}
 }

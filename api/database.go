@@ -23,7 +23,7 @@ func NewDB() *Database {
 func (d *Database) connect() {
 	var err error
 	creds := LoadCredentials()	
-	uri := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", creds.User, creds.Pass, creds.Host, creds.Port, creds.Database)
+	uri := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", creds.User, creds.Pass, creds.Host, creds.Port, creds.Database)
 	
 	//Open connection
 	d.db, err = sql.Open("mysql", uri)

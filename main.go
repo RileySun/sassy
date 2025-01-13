@@ -1,9 +1,12 @@
 package main
 
 import(
-	//"api"
+	"log"
+	"api"
 )
 
 func main() {
 	//auth := api.NewAuth()
+	//fmt.Println(auth.NewToken())
+	//LaunchServer()
 }

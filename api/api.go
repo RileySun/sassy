@@ -4,6 +4,7 @@ import(
 	"fmt"
 	"log"
 	"errors"
+	"slices"
 )
 
 //The actual API isnt as important as using the api, so we're gonna go with a basic one. 
@@ -24,26 +25,33 @@ func NewAPI() *API {
 
 //User
 func (a *API) GetUserBy(column string, identifier any) *User {
-	//Get Data
-	rows, err := a.db.db.Query("SELECT `id`, `name`, `trial`, `get`, `add`, `update`, `delete` FROM Users WHERE ? = ?;", column, identifier)
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil
+	}
 	
+	//Get Data
+	rows, err := a.db.db.Query("SELECT `id`, `name`, `trial`, `get`, `add`, `update`, `delete` FROM Users WHERE `"+column+"` = ?;", identifier)
 	if err != nil {
-		log.Println(err, "- API:GetUserBy - Rows")
+		log.Fatal(err, "- API:GetUserBy - Rows")
 	}
 	defer rows.Close()
+	
+	//log.Fatal(rows.Columns())
 	
 	//Extract Data to struct object
 	user := &User{}
 	for rows.Next() {
 		err = rows.Scan(&user.ID, &user.Name, &user.Trial, &user.Get, &user.Add, &user.Update, &user.Delete); 
 		if err != nil {
-			log.Println(fmt.Errorf("User Where %s = %s", column, identifier))
+			log.Fatal(fmt.Errorf("User Where %s = %s", column, identifier))
 		}
     }
 	
 	//If errors return nil, if not return struct object
 	if err = rows.Err(); err != nil {
-		log.Println(err, "- API:GetUserBy - Completion")
+		log.Fatal(err, "- API:GetUserBy - Completion")
 		return nil
 	} else {
 		return user
@@ -52,8 +60,14 @@ func (a *API) GetUserBy(column string, identifier any) *User {
 
 //Model
 func (a *API) GetModelBy(column string, identifier any) (*Model, error) {
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil, columnErr
+	}
+	
 	//Get Data
-	rows, err := a.db.db.Query("SELECT * FROM Models WHERE ? = ?;", column, identifier)
+	rows, err := a.db.db.Query("SELECT * FROM Models WHERE `"+column+"` = ?;", identifier)
 	if err != nil {
 		log.Println(err, "- API:GetModelBy - Rows")
 		return nil, errors.New("Error Model/Get")
@@ -108,8 +122,14 @@ func (a *API) DeleteModel(id int) error {
 
 //Images
 func (a *API) GetImagesBy(column string, identifier any) ([]*Image, error) {
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil, columnErr
+	}
+	
 	//Get Data
-	rows, err := a.db.db.Query("SELECT * FROM Images WHERE ? = ?;", column, identifier)
+	rows, err := a.db.db.Query("SELECT * FROM Images WHERE `"+column+"` = ?;", identifier)
 	if err != nil {
 		log.Println(err, "- API:GetImagesBy - Rows")
 		return nil, errors.New("Error Images/Get")
@@ -166,8 +186,14 @@ func (a *API) DeleteImage(id int) error {
 
 //Videos
 func (a *API) GetVideosBy(column string, identifier any) ([]*Video, error) {
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil, columnErr
+	}
+	
 	//Get Data
-	rows, err := a.db.db.Query("SELECT * FROM Videos WHERE ? = ?;", column, identifier)
+	rows, err := a.db.db.Query("SELECT * FROM Videos WHERE `"+column+"` = ?;", identifier)
 	if err != nil {
 		log.Println(err, "- API:GetVideosBy - Rows")
 		return nil, errors.New("Error Videos/Get")
@@ -220,4 +246,14 @@ func (a *API) DeleteVideo(id int) error {
     }
     _, err = statement.Exec(id)
     return err
+}
+
+//Util
+func (a *API) checkColumnName(column string) error {
+	allowed := []string{"id", "name", "trial", "get", "add", "update", "delete", "desc", "model_id", "path" }
+	if slices.Contains(allowed, column) {
+		return nil
+	} else {
+		return errors.New("Disallowed column name, NO SQL INJECTIONS!")
+	}
 }

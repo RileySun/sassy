@@ -1,20 +1,43 @@
 package api
 
 import(
+	"os"
+	//"log"
 	"testing"
-	"reflect"
 )
 
+var auth *Auth
+var token *Token
+
+func TestMain(m *testing.M) {
+	auth = NewAuth()
+	exitCode := m.Run()
+	os.Exit(exitCode)
+}
+
 func TestNewUser(t *testing.T) {
-	auth := NewAuth()
 	createErr := auth.NewUser("Tester", "TeStEd", false)
 	if createErr != nil {
 		t.Error(createErr.Error())
 	}
 }
 
+func TestNewToken(t *testing.T) {
+	newToken, tokenErr := auth.NewToken("Tester", "TeStEd")
+	if tokenErr != nil {
+		t.Error(tokenErr.Error())
+	}
+	token = newToken
+}
+
+func TestDeleteToken(t *testing.T) {
+	deleteErr := auth.DeleteToken(token.refresh)
+	if deleteErr != nil {
+		t.Error(deleteErr.Error())
+	}
+}
+
 func TestCheckLogin(t *testing.T) {
-	auth := NewAuth()
 	loginErr := auth.CheckLogin("Tester", "TeStEd")
 	if loginErr != nil {
 		t.Error(loginErr.Error())
@@ -22,7 +45,6 @@ func TestCheckLogin(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	auth := NewAuth()
 	deleteErr := auth.DeleteUser("Tester", "TeStEd")
 	if deleteErr != nil {
 		t.Error(deleteErr.Error())
@@ -30,29 +52,14 @@ func TestDeleteUser(t *testing.T) {
 }
 
 //Secrets
-func TestSecretManagerConnection(t *testing.T) {
-	auth := NewAuth()
-	
+func TestSecretManagerConnection(t *testing.T) {	
 	err := auth.NewSecretManager()
 	if err != nil {
 		t.Error(err.Error())
 	}
 }
 
-func TestNewToken(t *testing.T) {
-	token := NewToken()
-	
-	if reflect.TypeOf(token) != reflect.TypeOf("string") {
-		t.Errorf("Token is not string. %T, wanted string", token)
-	}
-	
-	if len(token) != 36 {
-		t.Errorf("Token character length. %v, wanted 36", len(token))
-	}
-}
-
 func TestAddGetSecret(t *testing.T) {
-	auth := NewAuth()
 	err := auth.NewSecretManager()
 	if err != nil {
 		t.Error("Cannot connect to secret manager")
