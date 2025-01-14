@@ -5,36 +5,40 @@ import(
 )
 
 func TestIsUnderQuota(t *testing.T) {
-	//These users correspond to real users in the database, one being unlimited rated
-	//and the other one already being at max rate limit
-	api := NewAPI()
-	unlimited := api.GetUserBy("name", "unlimited")
-	limited := api.GetUserBy("name", "limited")
+	unlimited, unlimitedErr := api.GetUserBy("name", "unlimited")
+	if unlimitedErr != nil {
+		t.Error(unlimitedErr.Error())
+	}
+	
+	limited, limitedErr := api.GetUserBy("name", "limited")
+	if limitedErr != nil {
+		t.Error(limitedErr.Error())
+	}
 	
 	//Unlimited Rate User
 	nonTrial := api.IsUnderQuota(unlimited.ID, "Update")
-	if !nonTrial {
-		t.Error("User should be not trial limited")
+	if nonTrial != nil  {
+		t.Error("User `unlimited` should be not trial limited")
 	}
 	
 	//Rate Limited User
 	underGetQuota := api.IsUnderQuota(limited.ID, "Get")
-	if underGetQuota {
-		t.Error("User should be at max limit for Get funtion")
+	if underGetQuota == nil {
+		t.Error("User `limited` should be at max limit for Get funtion")
 	}
 	
 	underAddQuota := api.IsUnderQuota(limited.ID, "Add")
-	if underAddQuota {
+	if underAddQuota == nil {
 		t.Error("User should be at max limit for Add funtion")
 	}
 	
 	underUpdateQuota := api.IsUnderQuota(limited.ID, "Update")
-	if underUpdateQuota {
+	if underUpdateQuota == nil {
 		t.Error("User should be at max limit for Update funtion")
 	}
 	
 	underDeleteQuota := api.IsUnderQuota(limited.ID, "Delete")
-	if underDeleteQuota {
+	if underDeleteQuota == nil {
 		t.Error("User should be at max limit for Delete funtion")
 	}
 }

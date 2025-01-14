@@ -1,24 +1,24 @@
 package api
 
 import(
-	"fmt"
 	"time"
 	"errors"
 	"slices"
-	"context"
 	"strings"
 	
 	"github.com/google/uuid"
 	
 	"golang.org/x/crypto/bcrypt"
 	
-	openbao "github.com/openbao/openbao/api/v2"
+	//"fmt"
+	//"context"
+	//openbao "github.com/openbao/openbao/api/v2"
 )
 
 //Struct
 type Auth struct {
 	db *Database
-	baoClient *openbao.Client
+	//baoClient *openbao.Client
 }
 
 type Token struct {
@@ -71,22 +71,11 @@ func (a *Auth) StoreToken(name string, newToken *Token) error {
 
 func (a *Auth) CheckToken(accessToken string) error {
 	//Get Expiration data
-	rows, rowErr := a.db.db.Query("SELECT `expires_in` FROM Tokens WHERE `access_token` = ?;", accessToken)
-	if rowErr != nil {
-		return rowErr
-	}
-	defer rows.Close()
-	
 	var expires time.Time
-	for rows.Next() {
-		rowErr := rows.Scan(expires); 
-		if rowErr != nil {
-			return rowErr
-		}
-    }
-    
-    if completeErr := rows.Err(); completeErr != nil {
-		return completeErr
+	row := a.db.db.QueryRow("SELECT `expires_in` FROM Tokens WHERE `access_token` = ?;", accessToken)
+	scanErr := row.Scan(&expires)
+	if scanErr != nil {
+		return errors.New("Invalid access token")
 	}
 	
 	//Parse Expiration]
@@ -96,7 +85,7 @@ func (a *Auth) CheckToken(accessToken string) error {
 	} else {
 		return errors.New("Access token has expired")
 	}
-}
+} //Selected by access token
 
 func (a *Auth) GetToken(column string, identifier any) (*Token, error) {
 	//Validate column names
@@ -106,27 +95,13 @@ func (a *Auth) GetToken(column string, identifier any) (*Token, error) {
 	}
 	
 	//Get Data
-	rows, rowErr := a.db.db.Query("SELECT `access_token`, `refresh_token`, `expires_in` FROM Tokens WHERE `"+column+"` = ?;", column, identifier)
-	if rowErr != nil {
-		return nil, rowErr
-	}
-	defer rows.Close()
-	
-	//Extract Data to struct object
 	token := &Token{}
-	for rows.Next() {
-		rowErr := rows.Scan(&token.access, &token.refresh, &token.expires); 
-		if rowErr != nil {
-			return nil, rowErr
-		}
-    }
-	
-	//Completion Errors
-	if completeErr := rows.Err(); completeErr != nil {
-		return nil, completeErr
-	} else {
-		return token, nil
+	row := a.db.db.QueryRow("SELECT `access_token`, `refresh_token`, `expires_in` FROM Tokens WHERE `"+column+"` = ?;", identifier)
+	scanErr := row.Scan(&token.access, &token.refresh, &token.expires)
+	if scanErr != nil {
+		return nil, scanErr
 	}
+	return token, nil
 }
 
 func (a *Auth) GenerateToken(refreshToken string) (string, error) {	
@@ -161,10 +136,15 @@ func (a *Auth) DeleteToken(refreshToken string) error {
 	
 	_, stateErr := statement.Exec(refreshToken)
 	return stateErr
-}
+} //Selected by refresh token
 
 //User Functions
-func (a *Auth) NewUser(name string, password string, trial bool) error {	
+func (a *Auth) NewUser(name string, password string, trial bool) error {
+	isTaken := a.IsUserTaken(name)
+	if isTaken != nil {
+		return isTaken
+	}
+
 	//Bcrypt pass
 	pass, passErr := a.HashPassword(password)
 	if passErr != nil {
@@ -184,6 +164,31 @@ func (a *Auth) NewUser(name string, password string, trial bool) error {
 	return stateErr
 }
 
+func (a *Auth) IsUserTaken(name string) error {
+	//Get Data
+	rows, rowErr := a.db.db.Query("SELECT `name` FROM Users")
+	if rowErr != nil {
+		return rowErr
+	}
+	defer rows.Close()
+	
+	//Extract Names
+	for rows.Next() {
+		var taken string
+		scanErr := rows.Scan(&taken); 
+		if scanErr != nil {
+			return scanErr
+		}
+		
+		//Check if username is taken
+		if taken == name {
+			return errors.New("Username is taken, please enter a different username")
+		}
+    }
+    
+    return nil
+}
+
 func (a *Auth) DeleteUser(name string, password string) error {
 	//Now Delete
 	db := NewDB()
@@ -198,36 +203,23 @@ func (a *Auth) DeleteUser(name string, password string) error {
 	return stateErr
 } //Might Delete user if usernames are the same and index is first, maybe we check in user creation so no users with same name...
 
-func (a *Auth) CheckLogin(name string, password string) error {	
-	//Get User by Name
-	rows, rowErr := a.db.db.Query("SELECT `name`, `pass` FROM Users WHERE `name` = ?;", name)
-	if rowErr != nil {
-		return rowErr
-	}
-	defer rows.Close()
-	
-	//Don't use API user, we dont need all that info and API doesnt need passwords
+func (a *Auth) CheckLogin(name string, password string) error {
+	//Get Data
 	user := struct {
 		Name string 
 		Pass string
 	}{}
-	for rows.Next() {
-		scanErr := rows.Scan(&user.Name, &user.Pass); 
-		if scanErr != nil {
-			return scanErr
-		}
-    }
-	
-	//Completion Errors
-	if completeErr := rows.Err(); completeErr != nil {
-		return completeErr
+	row := a.db.db.QueryRow("SELECT `name`, `pass` FROM Users WHERE `name` = ?;", name)
+	scanErr := row.Scan(&user.Name, &user.Pass)
+	if scanErr != nil {
+		return errors.New("Invalid Login Information")
 	}
 	
 	//Check for correct password
 	if a.CheckPassword(user.Pass, password) {
 		return nil
 	} else {
-		return errors.New("Invalid Password")
+		return errors.New("Invalid Login Information")
 	}
 }
 
@@ -242,6 +234,7 @@ func (a *Auth) CheckPassword(hashed string, password string) bool {
 	return err == nil
 }
 
+/* Not sure what we are using this for yet.
 //Secret Storage (using openbau)
 func (a *Auth) NewSecretManager() error {
 	//Credentials
@@ -281,7 +274,7 @@ func (a *Auth) GetSecret(secretPassword string) (string, error) {
 	
 	return value, nil
 }
-
+*/
 //Util
 func (a *Auth) checkColumnName(column string) error {
 	allowed := []string{"id", "name", "refresh_token", "expires_in"}

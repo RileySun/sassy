@@ -1,39 +1,30 @@
 package api
 
 import(
-	"os"
-	//"log"
 	"testing"
 )
 
 var auth *Auth
 var token *Token
 
-func TestMain(m *testing.M) {
+//Main
+func AuthTestInit() {
 	auth = NewAuth()
-	exitCode := m.Run()
-	os.Exit(exitCode)
 }
 
+//User (Delete when finished)
 func TestNewUser(t *testing.T) {
 	createErr := auth.NewUser("Tester", "TeStEd", false)
 	if createErr != nil {
 		t.Error(createErr.Error())
+		t.Fail()
 	}
 }
 
-func TestNewToken(t *testing.T) {
-	newToken, tokenErr := auth.NewToken("Tester", "TeStEd")
-	if tokenErr != nil {
-		t.Error(tokenErr.Error())
-	}
-	token = newToken
-}
-
-func TestDeleteToken(t *testing.T) {
-	deleteErr := auth.DeleteToken(token.refresh)
-	if deleteErr != nil {
-		t.Error(deleteErr.Error())
+func TestIsUserTaken(t *testing.T) {
+	takenErr := auth.IsUserTaken("Tester")
+	if takenErr == nil {
+		t.Error("Username should be taken")
 	}
 }
 
@@ -44,6 +35,61 @@ func TestCheckLogin(t *testing.T) {
 	}
 }
 
+//Token
+func TestNewToken(t *testing.T) {
+	newToken, tokenErr := auth.NewToken("Tester", "TeStEd")
+	if tokenErr != nil {
+		t.Error(tokenErr.Error())
+		t.Fail()
+	}
+	token = newToken
+}
+
+func TestCheckToken(t *testing.T) {
+	isValid := auth.CheckToken(token.access)
+	if isValid != nil {
+		t.Error(isValid.Error())
+	}
+}
+
+func TestGetToken(t *testing.T) {
+	newToken, tokenErr := auth.GetToken("refresh_token", token.refresh)
+	if tokenErr != nil {
+		t.Error(tokenErr.Error())
+	}
+	
+	if newToken.refresh != token.refresh || newToken.access != token.access {
+		t.Error("Tokens do not match")
+	}
+}
+
+func TestGenerateToken(t *testing.T) {
+	newAccess, genErr := auth.GenerateToken(token.refresh)
+	if genErr != nil {
+		t.Error(genErr.Error())
+	}
+	
+	//Refresh test copy of token
+	var tokenErr error
+	token, tokenErr = auth.GetToken("refresh_token", token.refresh)
+	if tokenErr != nil {
+		t.Error(tokenErr.Error())
+	}
+	
+	//Does it match
+	if newAccess != token.access {
+		t.Error("Access token has not changed")
+	}
+}
+
+func TestDeleteToken(t *testing.T) {
+	deleteErr := auth.DeleteToken(token.refresh)
+	if deleteErr != nil {
+		t.Error(deleteErr.Error())
+	}
+}
+
+//Delete User
 func TestDeleteUser(t *testing.T) {
 	deleteErr := auth.DeleteUser("Tester", "TeStEd")
 	if deleteErr != nil {
@@ -51,6 +97,20 @@ func TestDeleteUser(t *testing.T) {
 	}
 }
 
+//Column Name Sanitization
+func TestAuthCheckColumnName(t *testing.T) {
+	shouldPass := api.checkColumnName("id")
+	if shouldPass != nil {
+		t.Error(shouldPass.Error())
+	}
+	
+	shouldFail := api.checkColumnName("test")
+	if shouldFail == nil {
+		t.Error("Should not be a valid column name")
+	}
+}
+
+/* See auth.go secrets section
 //Secrets
 func TestSecretManagerConnection(t *testing.T) {	
 	err := auth.NewSecretManager()
@@ -80,3 +140,4 @@ func TestAddGetSecret(t *testing.T) {
 		t.Errorf("Secrets dont match. %s, wanted 73b1d07b-d4b8-4976-96cd-9b76b99e45b1", storedSecret)
 	}
 }
+*/
