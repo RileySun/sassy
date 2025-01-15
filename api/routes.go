@@ -19,7 +19,7 @@ func (r *Routes) GetModel(modelID int, userID int) []byte {
 	 quotaOK := r.API.IsUnderQuota(userID, "get")
 	
 	if quotaOK == nil {
-		model, err := r.API.GetModelBy("`id`", modelID)
+		model, err := r.API.GetModelBy("id", modelID)
 		if err != nil {
 			return []byte("Error Model/Get, please contact administrator ")
 		}
@@ -84,7 +84,7 @@ func (r *Routes) GetImages(modelID int, userID int) []byte {
 	 quotaOK := r.API.IsUnderQuota(userID, "get")
 	
 	if quotaOK == nil {
-		images, err := r.API.GetImagesBy("`model_id`", modelID)
+		images, err := r.API.GetImagesBy("model_id", modelID)
 		if err != nil {
 			return []byte("Error Image/Get, please contact administrator ")
 		}
@@ -153,7 +153,7 @@ func (r *Routes) GetVideos(modelID int, userID int) []byte {
 	 quotaOK := r.API.IsUnderQuota(userID, "get")
 	
 	if quotaOK == nil {
-		videos, err := r.API.GetVideosBy("`model_id`", modelID)
+		videos, err := r.API.GetVideosBy("model_id", modelID)
 		if err != nil {
 			return []byte("Error Video/Get, please contact administrator ")
 		}
