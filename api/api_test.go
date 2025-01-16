@@ -8,7 +8,7 @@ import(
 )
 
 var api *API
-var model *Model
+var testModel *Model
 var testImage *Image
 var testVideo *Video
 
@@ -37,21 +37,21 @@ func TestGetModelBy(t *testing.T) {
 	if getErr != nil {
 		t.Error(getErr.Error())
 	}
-	model = newModel
+	testModel = newModel
 }
 
 func TestUpdateModel(t *testing.T) {
-	updateErr := api.UpdateModel(model.ID, "Anna Faris", "Former Movie Actress")
+	updateErr := api.UpdateModel(testModel.ID, "Anna Faris", "Former Movie Actress")
 	if updateErr != nil {
 		t.Error(updateErr.Error())
 	}
 	
-	newModel, getErr := api.GetModelBy("id", model.ID)
+	newModel, getErr := api.GetModelBy("id", testModel.ID)
 	if getErr != nil {
 		t.Error(getErr.Error())
 	}
 	
-	if newModel.Name == model.Name || newModel.Desc == model.Desc {
+	if newModel.Name == testModel.Name || newModel.Desc == testModel.Desc {
 		t.Error("Models should not match")
 	}
 }
@@ -61,7 +61,7 @@ func TestAddImages(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		path := "/Images/Test/" + strconv.Itoa(i) + ".jpg"
 		desc := "Tester Image " + strconv.Itoa(i)
-		addErr := api.AddImage(model.ID, path, desc)
+		addErr := api.AddImage(testModel.ID, path, desc)
 		if addErr != nil {
 			t.Error(addErr.Error())
 			t.Fail()
@@ -69,8 +69,9 @@ func TestAddImages(t *testing.T) {
 	}
 }
 
+
 func TestGetImagesBy(t *testing.T) {
-	images, getErr := api.GetImagesBy("model_id", model.ID)
+	images, getErr := api.GetImagesBy("model_id", testModel.ID)
 	if getErr != nil {
 		t.Error(getErr.Error())
 	}
@@ -89,6 +90,18 @@ func TestGetImagesBy(t *testing.T) {
 	}
 	
 	testImage = images[i]
+}
+
+func TestGetImageBy(t *testing.T) {
+	image, getErr := api.GetImageBy("id", testImage.ID)
+	if getErr != nil {
+		t.Error(getErr.Error())
+	}
+
+	//Sample random image
+	if image.Path != testImage.Path || image.Desc != testImage.Desc {
+		t.Error("Image Data does not match test Data")
+	}
 }
 
 func TestUpdateImage(t *testing.T) {
@@ -139,7 +152,7 @@ func TestAddVideos(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		path := "/Videos/Test/" + strconv.Itoa(i) + ".mp4"
 		desc := "Tester Video " + strconv.Itoa(i)
-		addErr := api.AddVideo(model.ID, path, desc)
+		addErr := api.AddVideo(testModel.ID, path, desc)
 		if addErr != nil {
 			t.Error(addErr.Error())
 			t.Fail()
@@ -148,7 +161,7 @@ func TestAddVideos(t *testing.T) {
 }
 
 func TestGetVideosBy(t *testing.T) {
-	videos, getErr := api.GetVideosBy("model_id", model.ID)
+	videos, getErr := api.GetVideosBy("model_id", testModel.ID)
 	if getErr != nil {
 		t.Error(getErr.Error())
 	}
@@ -167,6 +180,18 @@ func TestGetVideosBy(t *testing.T) {
 	}
 	
 	testVideo = videos[i]
+}
+
+func TestGetVideoBy(t *testing.T) {
+	video, getErr := api.GetVideoBy("id", testVideo.ID)
+	if getErr != nil {
+		t.Error(getErr.Error())
+	}
+
+	//Sample random image
+	if video.Path != testVideo.Path || video.Desc != testVideo.Desc {
+		t.Error("Video Data does not match test Data")
+	}
 }
 
 func TestUpdateVideo(t *testing.T) {
@@ -214,12 +239,12 @@ func TestDeleteVideos(t *testing.T) {
 
 //Delete Model
 func TestDeleteModel(t *testing.T) {
-	deleteErr := api.DeleteModel(model.ID)
+	deleteErr := api.DeleteModel(testModel.ID)
 	if deleteErr != nil {
 		t.Error(deleteErr.Error())
 	}
 	
-	_, getErr := api.GetModelBy("id", model.ID)
+	_, getErr := api.GetModelBy("id", testModel.ID)
 	if getErr == nil {
 		t.Error("Model should not exist")
 	}

@@ -47,17 +47,23 @@ func (r *Routes) AddModel(name string, desc string, userID int) []byte {
 	}
 } //API/Model/Add
 
-func (r *Routes) UpdateModel(modelID int, name string, desc string, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "Update")
+func (r *Routes) UpdateModel(modelID string, name string, desc string, userID int) []byte {
+	//Validate modelID
+	modelInt, convErr := strconv.Atoi(modelID)
+	if convErr != nil {
+		return []byte("Model ID must be a number")
+	}
+	
+	quotaOK := r.API.IsUnderQuota(userID, "Update")
 	
 	if quotaOK == nil {
-		err := r.API.UpdateModel(modelID, name, desc)
+		err := r.API.UpdateModel(modelInt, name, desc)
 		if err != nil {
 			return []byte("Error Model/Update, please contact administrator ")
 		}
 		r.API.AddToQuota(userID, "Update")
 		
-		return []byte("Model `" + strconv.Itoa(modelID) + "` updated successfully")
+		return []byte("Model " + modelID + " updated successfully")
 	} else {
 		return []byte("User quota limit reached: Update")
 	}
@@ -73,7 +79,7 @@ func (r *Routes) DeleteModel(modelID int, userID int) []byte {
 		}
 		r.API.AddToQuota(userID, "Delete")
 		
-		return []byte("Model `" + strconv.Itoa(modelID) + "` deleted successfully")
+		return []byte("Model " + strconv.Itoa(modelID) + " deleted successfully")
 	} else {
 		return []byte("User quota limit reached: Delete")
 	}
@@ -100,33 +106,55 @@ func (r *Routes) GetImages(modelID int, userID int) []byte {
 	}
 } //API/Image/Get
 
-func (r *Routes) AddImage(modelID int, path string, desc string, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "Add")
+func (r *Routes) AddImage(modelID string, path string, desc string, userID int) []byte {
+	//Validate modelID
+	modelInt, convErr := strconv.Atoi(modelID)
+	if convErr != nil {
+		return []byte("Model ID must be a number")
+	}
+	
+	quotaOK := r.API.IsUnderQuota(userID, "Add")
 	
 	if quotaOK == nil {
-		err := r.API.AddImage(modelID, path, desc)
+		err := r.API.AddImage(modelInt, path, desc)
 		if err != nil {
 			return []byte("Error Image/Add, please contact administrator ")
 		}
 		r.API.AddToQuota(userID, "Add")
 		
-		return []byte("Image for model `" + strconv.Itoa(modelID) + " added successfully")
+		return []byte("Image for model " + modelID + " added successfully")
 	} else {
 		return []byte("User quota limit reached: Add")
 	}
 } //API/Image/Add
 
-func (r *Routes) UpdateImage(imageID int, modelID int, path string, desc string, userID int) []byte {
+func (r *Routes) UpdateImage(imageID string, modelID string, path string, desc string, userID int) []byte {
+	//Validate imageID
+	imageInt, convErr := strconv.Atoi(imageID)
+	if convErr != nil {
+		return []byte("Image ID must be a number")
+	}
+	
+	//Validate modelID
+	modelInt, convErr := strconv.Atoi(modelID)
+	if convErr != nil {
+		modelInt = 0
+	}
+
 	 quotaOK := r.API.IsUnderQuota(userID, "Update")
 	
 	if quotaOK == nil {
-		err := r.API.UpdateImage(imageID, modelID, path, desc)
+		err := r.API.UpdateImage(imageInt, modelInt, path, desc)
 		if err != nil {
-			return []byte("Error Images/Update, please contact administrator ")
+			if err.Error() == "Invalid Image ID" {
+				return []byte("Invalid Image ID")
+			} else {
+				return []byte("Error Image/Update, please contact administrator ")
+			}
 		}
 		r.API.AddToQuota(userID, "Update")
 		
-		return []byte("Image `" + strconv.Itoa(modelID) + "` updated successfully")
+		return []byte("Image " + imageID + " updated successfully")
 	} else {
 		return []byte("User quota limit reached: Update")
 	}
@@ -138,11 +166,15 @@ func (r *Routes) DeleteImage(imageID int, userID int) []byte {
 	if quotaOK == nil {
 		err := r.API.DeleteImage(imageID)
 		if err != nil {
-			return []byte("Error Image/Delete, please contact administrator ")
+			if err.Error() == "Invalid Image ID" {
+				return []byte("Invalid Image ID")
+			} else {
+				return []byte("Error Image/Delete, please contact administrator ")
+			}
 		}
 		r.API.AddToQuota(userID, "Delete")
 		
-		return []byte("Image `" + strconv.Itoa(imageID) + "` deleted successfully")
+		return []byte("Image " + strconv.Itoa(imageID) + " deleted successfully")
 	} else {
 		return []byte("User quota limit reached: Delete")
 	}
@@ -169,33 +201,54 @@ func (r *Routes) GetVideos(modelID int, userID int) []byte {
 	}
 } //API/Video/Get
 
-func (r *Routes) AddVideo(modelID int, path string, desc string, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "Add")
+func (r *Routes) AddVideo(modelID string, path string, desc string, userID int) []byte {
+	modelInt, convErr := strconv.Atoi(modelID)
+	if convErr != nil {
+		return []byte("Model ID must be a number")
+	}
+	
+	quotaOK := r.API.IsUnderQuota(userID, "Add")
 	
 	if quotaOK == nil {
-		err := r.API.AddVideo(modelID, path, desc)
+		err := r.API.AddVideo(modelInt, path, desc)
 		if err != nil {
 			return []byte("Error Video/Add, please contact administrator ")
 		}
 		r.API.AddToQuota(userID, "Add")
 		
-		return []byte("Video for model `" + strconv.Itoa(modelID) + " added successfully")
+		return []byte("Video for model " + modelID + " added successfully")
 	} else {
 		return []byte("User quota limit reached: Add")
 	}
 } //API/Video/Add
 
-func (r *Routes) UpdateVideo(imageID int, modelID int, path string, desc string, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "Update")
+func (r *Routes) UpdateVideo(videoID string, modelID string, path string, desc string, userID int) []byte {
+	//Validate imageID
+	videoInt, convErr := strconv.Atoi(videoID)
+	if convErr != nil {
+		return []byte("Video ID must be a number")
+	}
+	
+	//Validate modelID
+	modelInt, convErr := strconv.Atoi(modelID)
+	if convErr != nil {
+		modelInt = 0
+	}
+	
+	quotaOK := r.API.IsUnderQuota(userID, "Update")
 	
 	if quotaOK == nil {
-		err := r.API.UpdateVideo(imageID, modelID, path, desc)
+		err := r.API.UpdateVideo(videoInt, modelInt, path, desc)
 		if err != nil {
-			return []byte("Error Videos/Update, please contact administrator ")
+			if err.Error() == "Invalid Video ID" {
+				return []byte("Invalid Video ID")
+			} else {
+				return []byte("Error Video/Delete, please contact administrator ")
+			}
 		}
 		r.API.AddToQuota(userID, "Update")
 		
-		return []byte("Video `" + strconv.Itoa(modelID) + "` updated successfully")
+		return []byte("Video " + videoID + " updated successfully")
 	} else {
 		return []byte("User quota limit reached: Update")
 	}
@@ -207,11 +260,15 @@ func (r *Routes) DeleteVideo(videoID int, userID int) []byte {
 	if quotaOK == nil {
 		err := r.API.DeleteVideo(videoID)
 		if err != nil {
-			return []byte("Error Video/Delete, please contact administrator ")
+			if err.Error() == "Invalid Video ID" {
+				return []byte("Invalid Video ID")
+			} else {
+				return []byte("Error Video/Delete, please contact administrator ")
+			}
 		}
 		r.API.AddToQuota(userID, "Delete")
 		
-		return []byte("Video `" + strconv.Itoa(videoID) + "` deleted successfully")
+		return []byte("Video " + strconv.Itoa(videoID) + " deleted successfully")
 	} else {
 		return []byte("User quota limit reached: Delete")
 	}

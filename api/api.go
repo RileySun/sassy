@@ -3,6 +3,7 @@ package api
 import(
 	"errors"
 	"slices"
+	"strconv"
 )
 
 //Object
@@ -65,12 +66,31 @@ func (a *API) AddModel(name string, desc string) error {
 }
 
 func (a *API) UpdateModel(id int, name string, desc string) error {
+	//Is this a real model
+	oldModel, modelErr := a.GetModelBy("id", id)
+	if modelErr != nil {
+		return errors.New("Invalid Model ID")
+	}
+	
+	//Missing or blank data means we do not change the field (can think of a more clever way to do this, but idk might be pitfalls)
+	var finalName, finalDesc string
+	if name == "" {
+		finalName = oldModel.Name
+	} else {
+		finalName = name
+	}
+	if desc == "" {
+		finalDesc = oldModel.Desc
+	} else {
+		finalDesc = desc
+	}
+
 	queryString := "UPDATE Models SET `name`=?, `desc`=? WHERE `id` = ?;"	
 	statement, prepErr := a.db.db.Prepare(queryString)
-	 if prepErr != nil {
+	if prepErr != nil {
        return prepErr
     }
-	 _, execErr := statement.Exec(name, desc, id)
+	 _, execErr := statement.Exec(finalName, finalDesc, id)
     return execErr
 }
 
@@ -115,7 +135,25 @@ func (a *API) GetImagesBy(column string, identifier any) ([]*Image, error) {
 	} else {
 		return images, nil
 	}
-}
+} //Plural
+
+func (a *API) GetImageBy(column string, identifier any) (*Image, error) {
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil, columnErr
+	}
+	
+	//Get Data
+	image := &Image{}
+	row := a.db.db.QueryRow("SELECT * FROM Images WHERE `"+column+"` = ?;", identifier)
+	scanErr := row.Scan(&image.ID, &image.Model_ID, &image.Path, &image.Desc);
+	if scanErr != nil {
+		return nil, scanErr
+	}
+	
+	return image, nil
+} //Singular
 
 func (a *API) AddImage(model_id int, path string, desc string) error {
 	statement, prepErr := a.db.db.Prepare("INSERT INTO Images (`model_id`, `path`, `desc`) VALUES (?, ?, ?)")
@@ -127,17 +165,48 @@ func (a *API) AddImage(model_id int, path string, desc string) error {
 }
 
 func (a *API) UpdateImage(id int, model_id int, path string, desc string) error {
+	//Is this a real image
+	oldImage, imageErr := a.GetImageBy("id", id)
+	if imageErr != nil {
+		return errors.New("Invalid Image ID")
+	}
+	
+	//Missing or blank data means we do not change the field (can think of a more clever way to do this, but idk might be pitfalls)
+	var finalModelID, finalPath, finalDesc string
+	if model_id == 0 {
+		finalModelID = strconv.Itoa(oldImage.Model_ID)
+	} else {
+		finalModelID = strconv.Itoa(model_id)
+	}
+	if path == "" {
+		finalPath = oldImage.Path
+	} else {
+		finalPath = path
+	}
+	if desc == "" {
+		finalDesc = oldImage.Desc
+	} else {
+		finalDesc = desc
+	}
+	
+	//Build Query
 	queryString := "UPDATE Images SET `model_id`=?, `path`=?, `desc`=? WHERE `id` = ?;"	
 	statement, prepErr := a.db.db.Prepare(queryString)
 	 if prepErr != nil {
         return prepErr
     }
     
-	 _, execErr := statement.Exec(model_id, path, desc, id)
+	 _, execErr := statement.Exec(finalModelID, finalPath, finalDesc, id)
     return execErr
 }
 
 func (a *API) DeleteImage(id int) error {
+	//Is this a real image
+	_, imageErr := a.GetImageBy("id", id)
+	if imageErr != nil {
+		return errors.New("Invalid Image ID")
+	}
+	
 	statement, prepErr := a.db.db.Prepare("DELETE FROM Images WHERE `id` = ?;")
     if prepErr != nil {
         return prepErr
@@ -179,7 +248,25 @@ func (a *API) GetVideosBy(column string, identifier any) ([]*Video, error) {
 	} else {
 		return videos, nil
 	}
-}
+} //Plural
+
+func (a *API) GetVideoBy(column string, identifier any) (*Video, error) {
+	//Validate column names
+	columnErr := a.checkColumnName(column)
+	if columnErr != nil {
+		return nil, columnErr
+	}
+	
+	//Get Data
+	video := &Video{}
+	row := a.db.db.QueryRow("SELECT * FROM Videos WHERE `"+column+"` = ?;", identifier)
+	scanErr := row.Scan(&video.ID, &video.Model_ID, &video.Path, &video.Desc);
+	if scanErr != nil {
+		return nil, scanErr
+	}
+	
+	return video, nil
+} //Singular
 
 func (a *API) AddVideo(model_id int, path string, desc string) error {
 	statement, prepErr := a.db.db.Prepare("INSERT INTO Videos (`model_id`, `path`, `desc`) VALUES (?, ?, ?)")
@@ -192,17 +279,47 @@ func (a *API) AddVideo(model_id int, path string, desc string) error {
 }
 
 func (a *API) UpdateVideo(id int, model_id int, path string, desc string) error {
+	//Is this a real video
+	oldVideo, videoErr := a.GetVideoBy("id", id)
+	if videoErr != nil {
+		return errors.New("Invalid Video ID")
+	}
+	
+	//Missing or blank data means we do not change the field (can think of a more clever way to do this, but idk might be pitfalls)
+	var finalModelID, finalPath, finalDesc string
+	if model_id == 0 {
+		finalModelID = strconv.Itoa(oldVideo.Model_ID)
+	} else {
+		finalModelID = strconv.Itoa(model_id)
+	}
+	if path == "" {
+		finalPath = oldVideo.Path
+	} else {
+		finalPath = path
+	}
+	if desc == "" {
+		finalDesc = oldVideo.Desc
+	} else {
+		finalDesc = desc
+	}
+	
 	queryString := "UPDATE Videos SET `model_id`=?, `path`=?, `desc`=? WHERE `id` = ?;"	
 	statement, prepErr := a.db.db.Prepare(queryString)
 	if prepErr != nil {
     	return prepErr
     }
     
-	 _, execErr := statement.Exec(model_id, path, desc, id)
+	 _, execErr := statement.Exec(finalModelID, finalPath, finalDesc, id)
     return execErr
 }
 
 func (a *API) DeleteVideo(id int) error {
+	//Is this a real video
+	_, videoErr := a.GetVideoBy("id", id)
+	if videoErr != nil {
+		return errors.New("Invalid Video ID")
+	}
+	
 	statement, prepErr := a.db.db.Prepare("DELETE FROM Videos WHERE `id` = ?;")
     if prepErr != nil {
     	return prepErr
