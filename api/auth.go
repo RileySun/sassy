@@ -1,6 +1,7 @@
 package api
 
 import(
+	"log"
 	"time"
 	"errors"
 	"slices"
@@ -83,7 +84,7 @@ func (a *Auth) CheckToken(accessToken string) error {
 	if isValid {
 		return nil
 	} else {
-		return errors.New("Access token has expired")
+		return errors.New("Access token has expired, please generate a new token.")
 	}
 } //Selected by access token
 
@@ -137,6 +138,32 @@ func (a *Auth) DeleteToken(refreshToken string) error {
 	_, stateErr := statement.Exec(refreshToken)
 	return stateErr
 } //Selected by refresh token
+
+func (a *Auth) GetUserIdFromToken(accessToken string) int {
+	name := ""
+	row := a.db.db.QueryRow("SELECT `name` FROM Tokens WHERE `access_token` = ?;", accessToken)
+	scanErr := row.Scan(&name)
+	if scanErr != nil {
+		log.Println("Error getting user ID from refresh token. NAME")
+	}
+	
+	userID := 0
+	row = a.db.db.QueryRow("SELECT `id` FROM Users WHERE `name` = ?;", name)
+	scanErr = row.Scan(&userID)
+	if scanErr != nil {
+		log.Println("Error getting user ID from refresh token. ID")
+	}
+	
+	return userID
+}
+
+func (t *Token) Access() string {
+	return t.access
+} //Returns access token
+
+func (t *Token) Refresh() string {
+	return t.refresh
+} //returns RefreshToken
 
 //User Functions
 func (a *Auth) NewUser(name string, password string, trial bool) error {
@@ -201,7 +228,7 @@ func (a *Auth) DeleteUser(name string, password string) error {
 	
 	_, stateErr := statement.Exec(name)
 	return stateErr
-} //Might Delete user if usernames are the same and index is first, maybe we check in user creation so no users with same name...
+}
 
 func (a *Auth) CheckLogin(name string, password string) error {
 	//Get Data
@@ -232,6 +259,16 @@ func (a *Auth) HashPassword(password string) (string, error) {
 func (a *Auth) CheckPassword(hashed string, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
 	return err == nil
+}
+
+//Util
+func (a *Auth) checkColumnName(column string) error {
+	allowed := []string{"id", "name", "refresh_token", "expires_in"}
+	if slices.Contains(allowed, column) {
+		return nil
+	} else {
+		return errors.New("Disallowed column name, NO SQL INJECTIONS!")
+	}
 }
 
 /* Not sure what we are using this for yet.
@@ -275,12 +312,3 @@ func (a *Auth) GetSecret(secretPassword string) (string, error) {
 	return value, nil
 }
 */
-//Util
-func (a *Auth) checkColumnName(column string) error {
-	allowed := []string{"id", "name", "refresh_token", "expires_in"}
-	if slices.Contains(allowed, column) {
-		return nil
-	} else {
-		return errors.New("Disallowed column name, NO SQL INJECTIONS!")
-	}
-}

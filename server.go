@@ -5,7 +5,9 @@ import(
 	
 	"log"
 	"fmt"
+	"errors"
 	"strconv"
+	"strings"
 	"net/http"
 	
 	"github.com/julienschmidt/httprouter"
@@ -66,10 +68,41 @@ func Error404(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 //Authentication
+func (s *Server) CheckAuthentication(r *http.Request) (int, error) {
+	Oauth := r.Header["Authorization"]
+	split :=  strings.Split(Oauth[0], " ")
+	
+	//Is Auth there?
+	if len(split) == 1 {
+		return 0, errors.New("Invalid Authorization Header")
+	}
+	accessToken := split[1]
+	
+	//Check Auth
+	authErr := s.Auth.CheckToken(accessToken)
+	if authErr != nil {
+		return 0, authErr
+	}
+	
+	//GetUserID
+	userID := s.Auth.GetUserIdFromToken(accessToken)
+	if userID == 0 {
+		return 0, errors.New("Authorization Failed, Please Contact Administrator")
+	}
+	
+	return userID, nil
+} //checks authorization and returns userID
 
 
 //Models
 func (s *Server) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
+
 	//Get Model ID from request
 	modelID, convErr := strconv.Atoi(ps.ByName("modelID"))
 	if convErr != nil || modelID == 0 {
@@ -78,7 +111,7 @@ func (s *Server) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}
 
 	//Retrieve Model
-	model := s.Routes.GetModel(modelID, 1)//modelID int, userID int
+	model := s.Routes.GetModel(modelID, userID)
 	_, writeErr := w.Write(model)
 	if writeErr != nil {
 		log.Println(writeErr)
@@ -86,8 +119,12 @@ func (s *Server) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.
 } //API/Model/Get GET
 
 func (s *Server) AddModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 
 	//Get POST Data
 	r.ParseForm()
@@ -105,8 +142,12 @@ func (s *Server) AddModel(w http.ResponseWriter, r *http.Request, ps httprouter.
 } //API/Model/Add POST
 
 func (s *Server) UpdateModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 
 	//Get POST Data
 	r.ParseForm()
@@ -145,6 +186,13 @@ func (s *Server) DeleteModel(w http.ResponseWriter, r *http.Request, ps httprout
 
 //Images
 func (s *Server) GetImages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
+	
 	//Get Model ID from request
 	modelID, convErr := strconv.Atoi(ps.ByName("modelID"))
 	if convErr != nil || modelID == 0 {
@@ -153,7 +201,7 @@ func (s *Server) GetImages(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 
 	//Retrieve Images
-	model := s.Routes.GetImages(modelID, 1) //modelID int, userID int
+	model := s.Routes.GetImages(modelID, userID) //modelID int, userID int
 	_, writeErr := w.Write(model)
 	if writeErr != nil {
 		log.Println(writeErr)
@@ -161,8 +209,12 @@ func (s *Server) GetImages(w http.ResponseWriter, r *http.Request, ps httprouter
 } //API/Image/Get GET
 
 func (s *Server) AddImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 
 	//Get POST Data
 	r.ParseForm()
@@ -181,8 +233,12 @@ func (s *Server) AddImage(w http.ResponseWriter, r *http.Request, ps httprouter.
 } //API/Image/Add POST
 
 func (s *Server) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 
 	//Get POST Data
 	r.ParseForm()
@@ -202,8 +258,12 @@ func (s *Server) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprout
 } //API/Image/Update POST
 
 func (s *Server) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 	
 	//Get Model ID from request
 	imageID, convErr := strconv.Atoi(ps.ByName("imageID"))
@@ -222,6 +282,13 @@ func (s *Server) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprout
 
 //Videos
 func (s *Server) GetVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
+	
 	//Get Model ID from request
 	modelID, convErr := strconv.Atoi(ps.ByName("modelID"))
 	if convErr != nil || modelID == 0 {
@@ -230,7 +297,7 @@ func (s *Server) GetVideos(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 
 	//Retrieve Videos
-	model := s.Routes.GetVideos(modelID, 1) //modelID int, userID int
+	model := s.Routes.GetVideos(modelID, userID)
 	_, writeErr := w.Write(model)
 	if writeErr != nil {
 		log.Println(writeErr)
@@ -239,8 +306,12 @@ func (s *Server) GetVideos(w http.ResponseWriter, r *http.Request, ps httprouter
 } //API/Video/Get POST
 
 func (s *Server) AddVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 
 	//Get POST Data
 	r.ParseForm()
@@ -259,8 +330,12 @@ func (s *Server) AddVideo(w http.ResponseWriter, r *http.Request, ps httprouter.
 } //API/Video/Add POST
 
 func (s *Server) UpdateVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 
 	//Get POST Data
 	r.ParseForm()
@@ -280,8 +355,12 @@ func (s *Server) UpdateVideo(w http.ResponseWriter, r *http.Request, ps httprout
 } //API/Video/Update POST
 
 func (s *Server) DeleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//Get User
-	userID := 1
+	//Check Auth and Get UserID
+	userID, authErr := s.CheckAuthentication(r)
+	if authErr != nil {
+		w.Write([]byte(authErr.Error()))
+		return
+	}
 	
 	//Get Model ID from request
 	videoID, convErr := strconv.Atoi(ps.ByName("videoID"))
