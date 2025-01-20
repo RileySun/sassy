@@ -1,6 +1,7 @@
 package api
 
 import(
+	"log"
 	"strconv"
 )
 
@@ -16,14 +17,18 @@ func (a *API) NewRoutes() *Routes {
 
 //Model
 func (r *Routes) GetModel(modelID int, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "get")
+	 quotaOK := r.API.IsUnderQuota(userID, "Get")
 	
 	if quotaOK == nil {
 		model, err := r.API.GetModelBy("id", modelID)
 		if err != nil {
 			return []byte("Error Model/Get, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Get")
+		
+		quotaErr := r.API.AddToQuota(userID, "Get")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Get (Model)")
+		}
 		
 		return model.JSON()
 	} else {
@@ -39,7 +44,11 @@ func (r *Routes) AddModel(name string, desc string, userID int) []byte {
 		if err != nil {
 			return []byte("Error Model/Add, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Add")
+		
+		quotaErr := r.API.AddToQuota(userID, "Add")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Add (Model)")
+		}
 		
 		return []byte("Model `" + name + "` added successfully")
 	} else {
@@ -61,7 +70,11 @@ func (r *Routes) UpdateModel(modelID string, name string, desc string, userID in
 		if err != nil {
 			return []byte("Error Model/Update, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Update")
+		
+		quotaErr := r.API.AddToQuota(userID, "Update")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Update (Model)")
+		}
 		
 		return []byte("Model " + modelID + " updated successfully")
 	} else {
@@ -77,7 +90,11 @@ func (r *Routes) DeleteModel(modelID int, userID int) []byte {
 		if err != nil {
 			return []byte("Error Model/Delete, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Delete")
+
+		quotaErr := r.API.AddToQuota(userID, "Delete")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Delete (Model)")
+		}
 		
 		return []byte("Model " + strconv.Itoa(modelID) + " deleted successfully")
 	} else {
@@ -87,14 +104,18 @@ func (r *Routes) DeleteModel(modelID int, userID int) []byte {
 
 //Images
 func (r *Routes) GetImages(modelID int, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "get")
+	 quotaOK := r.API.IsUnderQuota(userID, "Get")
 	
 	if quotaOK == nil {
 		images, err := r.API.GetImagesBy("model_id", modelID)
 		if err != nil {
 			return []byte("Error Image/Get, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Get")
+		
+		quotaErr := r.API.AddToQuota(userID, "Get")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Get (Images)")
+		}
 		
 		var output []byte
 		for _, i := range images {
@@ -120,7 +141,11 @@ func (r *Routes) AddImage(modelID string, path string, desc string, userID int) 
 		if err != nil {
 			return []byte("Error Image/Add, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Add")
+		
+		quotaErr := r.API.AddToQuota(userID, "Add")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Add (Images)")
+		}
 		
 		return []byte("Image for model " + modelID + " added successfully")
 	} else {
@@ -152,7 +177,11 @@ func (r *Routes) UpdateImage(imageID string, modelID string, path string, desc s
 				return []byte("Error Image/Update, please contact administrator ")
 			}
 		}
-		r.API.AddToQuota(userID, "Update")
+		
+		quotaErr := r.API.AddToQuota(userID, "Update")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Update (Images)")
+		}
 		
 		return []byte("Image " + imageID + " updated successfully")
 	} else {
@@ -172,7 +201,11 @@ func (r *Routes) DeleteImage(imageID int, userID int) []byte {
 				return []byte("Error Image/Delete, please contact administrator ")
 			}
 		}
-		r.API.AddToQuota(userID, "Delete")
+		
+		quotaErr := r.API.AddToQuota(userID, "Delete")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Delete (Images)")
+		}
 		
 		return []byte("Image " + strconv.Itoa(imageID) + " deleted successfully")
 	} else {
@@ -182,14 +215,18 @@ func (r *Routes) DeleteImage(imageID int, userID int) []byte {
 
 //Videos
 func (r *Routes) GetVideos(modelID int, userID int) []byte {
-	 quotaOK := r.API.IsUnderQuota(userID, "get")
+	 quotaOK := r.API.IsUnderQuota(userID, "Get")
 	
 	if quotaOK == nil {
 		videos, err := r.API.GetVideosBy("model_id", modelID)
 		if err != nil {
 			return []byte("Error Video/Get, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Get")
+		
+		quotaErr := r.API.AddToQuota(userID, "Get")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Get (Videos)")
+		}
 		
 		var output []byte
 		for _, v := range videos {
@@ -214,7 +251,11 @@ func (r *Routes) AddVideo(modelID string, path string, desc string, userID int) 
 		if err != nil {
 			return []byte("Error Video/Add, please contact administrator ")
 		}
-		r.API.AddToQuota(userID, "Add")
+		
+		quotaErr := r.API.AddToQuota(userID, "Add")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Add (Videos)")
+		}
 		
 		return []byte("Video for model " + modelID + " added successfully")
 	} else {
@@ -246,7 +287,11 @@ func (r *Routes) UpdateVideo(videoID string, modelID string, path string, desc s
 				return []byte("Error Video/Delete, please contact administrator ")
 			}
 		}
-		r.API.AddToQuota(userID, "Update")
+		
+		quotaErr := r.API.AddToQuota(userID, "Update")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Update (Videos)")
+		}
 		
 		return []byte("Video " + videoID + " updated successfully")
 	} else {
@@ -266,7 +311,11 @@ func (r *Routes) DeleteVideo(videoID int, userID int) []byte {
 				return []byte("Error Video/Delete, please contact administrator ")
 			}
 		}
-		r.API.AddToQuota(userID, "Delete")
+		
+		quotaErr := r.API.AddToQuota(userID, "Delete")
+		if quotaErr != nil {
+			log.Println("Quota error for user '" + strconv.Itoa(userID) + "' using method Delete (Videos)")
+		}
 		
 		return []byte("Video " + strconv.Itoa(videoID) + " deleted successfully")
 	} else {

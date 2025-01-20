@@ -13,8 +13,6 @@ import(
 	"github.com/julienschmidt/httprouter"
 )
 
-//Header["Authorization"] then i guess substr it for bearer token?
-
 type Server struct {
 	API *api.API
 	Auth *api.Auth
@@ -37,6 +35,9 @@ func NewServer() *Server {
 
 //Launch
 func (s *Server) Launch() {
+	//Auth
+	s.router.POST("/token/generate", s.GenerateAccessToken)
+	
 	//Models
 	s.router.GET("/model/get/:modelID", s.GetModel)
 	s.router.POST("/model/add", s.AddModel)
@@ -67,9 +68,14 @@ func Error404(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
     fmt.Fprint(w, "Invalid API call")
 }
 
-//Authentication
+//Authentication (I think a seperate server would be better for this)
 func (s *Server) CheckAuthentication(r *http.Request) (int, error) {
 	Oauth := r.Header["Authorization"]
+	
+	//dont split before u check it exists
+	if len(Oauth) == 0 {
+		return 0, errors.New("Invalid Authorization Header")
+	}
 	split :=  strings.Split(Oauth[0], " ")
 	
 	//Is Auth there?
@@ -93,6 +99,20 @@ func (s *Server) CheckAuthentication(r *http.Request) (int, error) {
 	return userID, nil
 } //checks authorization and returns userID
 
+func (s *Server) GenerateAccessToken(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.ParseForm()
+	refreshToken := r.PostFormValue("refresh_token")
+	if refreshToken == "" {
+		w.Write([]byte("Invalid Refresh Token"))
+		return
+	}
+	
+	accessToken, tokenErr := s.Auth.GenerateToken(refreshToken)
+	if tokenErr != nil {
+		w.Write([]byte(tokenErr.Error()))
+	}
+	w.Write([]byte(accessToken))
+}
 
 //Models
 func (s *Server) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

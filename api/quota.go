@@ -36,6 +36,8 @@ func (a *API) IsUnderQuota(userID int, actionType string) error {
 			if user.Delete > TRIAL_DELETE_LIMIT {
 				return errors.New("User is rate limited for usage - Delete")
 			}
+		default:
+			return errors.New("Invalid Method: " + actionType)
 	}
 	
 	return nil
@@ -56,6 +58,8 @@ func (a *API) AddToQuota(userID int, quotaType string) error {
 			user.Update += 1
 		case "Delete":
 			user.Delete += 1
+		default:
+			return errors.New("Invalid Quota Method:" + quotaType)
 	}
 	
 	g, ad, u, d := strconv.Itoa(user.Get), strconv.Itoa(user.Add), strconv.Itoa(user.Update), strconv.Itoa(user.Delete) 
@@ -69,6 +73,6 @@ func (a *API) UpdateUserQuotas(id int, getQuota string, addQuota string, updateQ
 	 if stmtErr != nil {
         return stmtErr
     }
-	 _, execErr := statement.Exec(id, getQuota, addQuota, updateQuota, deleteQuota)
+	 _, execErr := statement.Exec(getQuota, addQuota, updateQuota, deleteQuota, id)
     return execErr
 }

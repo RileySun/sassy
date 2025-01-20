@@ -5,6 +5,6 @@ import(
 )
 
 func main() {
-	server := NewServer()
-	server.Launch()
+	//server := NewServer()
+	//server.Launch()
 }
