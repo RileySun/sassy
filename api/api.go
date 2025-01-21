@@ -37,6 +37,33 @@ func (a *API) GetUserBy(column string, identifier any) (*User, error) {
 	return user, nil
 }
 
+func (a *API) GetAllUsers() ([]*User, error) {		
+	//Get Data
+	rows, rowErr := a.db.db.Query("SELECT `id`, `name`, `trial`, `get`, `add`, `update`, `delete` FROM Users")
+	if rowErr != nil {
+		return nil, rowErr
+	}
+	defer rows.Close()
+	
+	//Extract Data to struct object
+	var users []*User
+	for rows.Next() {
+		user := &User{}
+		scanErr := rows.Scan(&user.ID, &user.Name, &user.Trial, &user.Get, &user.Add, &user.Update, &user.Delete); 
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		users = append(users, user)
+    }
+	
+	//If errors return nil, if not return struct object
+	if completeErr := rows.Err(); completeErr != nil {
+		return nil, completeErr
+	} else {
+		return users, nil
+	}
+} 
+
 //Model
 func (a *API) GetModelBy(column string, identifier any) (*Model, error) {
 	//Validate column names
@@ -54,7 +81,7 @@ func (a *API) GetModelBy(column string, identifier any) (*Model, error) {
 	}
 	
 	return model, nil
-}
+} //Singular
 
 func (a *API) AddModel(name string, desc string) error {
 	statement, prepErr := a.db.db.Prepare("INSERT INTO Models (`name`, `desc`) VALUES (?, ?)")
