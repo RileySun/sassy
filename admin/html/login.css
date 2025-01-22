@@ -1,0 +1,145 @@
+body, html {background:#262626; font-family:Helvetica; height:100vh; margin:0; position:relative; width:100vw}
+
+.Login {
+	position: relative;
+	display: flex;
+	justify-items: center;
+	align-items: center;
+	width: 100%;
+	height: 100vh;
+	text-align: center;
+}
+.Login-Form {
+	display:block;
+	width: 30%;
+	margin: 0 auto;
+	padding: 1% 0;
+	background: #1d2d3a;
+	color: #EFEFEF;
+	border: 6px solid #1e252e;
+	border-radius: 15px;
+}
+.Login-Form-IMG {
+	display: block;
+	width: 30%;
+	margin: -3% auto;
+}
+.Login-Form-Title {
+	margin: 3% 0;
+	text-align: center;
+	font-weight: 400;
+	font-size: 4vw;
+}
+.Login-Input {
+	display: block;
+	width: 75%;
+	margin: 3% auto;
+	padding: 1.5% 2%;
+	background: #5e6f86;
+	color: #EFEFEF;
+	font-size: 1.75vw;
+	border: none;
+	outline: none !important;
+	border-radius: 13px;
+}
+.Login-Submit {
+	display: block;
+	width: 40%;
+	margin: 5% auto 0;
+	padding: 1% 0;
+	background: transparent;
+	color: #EFEFEF;
+	text-align: center;
+	font-size: 1.75vw;
+	border: 2px solid #EFEFEF;
+	border-radius: 13px;
+	transition: background 1s, color 1s;
+	cursor: pointer;
+}
+.Login-Submit:hover {
+	background: #EFEFEF;
+	color: #1d2d3a;
+}
+.Login-Popup-Container {
+	position: absolute;
+	display: none;
+	width: 100%;
+	height: 100vh;
+}
+.Login-Popup-Overlay {
+	position: relative;
+	width: 100%;
+	height: 100vh;
+	background: #000000CC;
+}
+.Login-Popup {
+	position: absolute;
+	display: block;
+	width: 40%;
+	margin: 0 auto;
+	padding: 2% 0;
+	top: 50%;
+	left: 0;
+	right: 0;
+	background: #1d2d3a;
+	border: 6px solid #1e252e;
+	border-radius: 15px;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+.Login-Popup-IMG {
+	display: inline-block;
+	width: 20%;
+	margin: 0 auto;
+	vertical-align: middle;
+}
+.Login-Info {
+	display: inline-block;
+	width: 80%;
+	margin: 0 auto;
+	vertical-align: middle;
+}
+.Login-Popup-Title {
+	display: block;
+	width: 40%;
+	margin: 1% auto 2%;
+	padding: 0 0 0.5%;
+	color: #EFEFEF;
+	text-align: center;
+	font-size: 2vw;
+	border-bottom: 3px solid;
+}
+.Login-Popup-Text {
+	display: block;
+	width: 70%;
+	margin: 1% auto;
+	color: #EFEFEF;
+	text-align: center;
+	font-size: 1.75vw;
+}
+.Login-Note {
+	position: absolute;
+	width: 20%;
+	top: -5%;
+	left: -2%;
+}
+.Login-Note-IMG {
+	position: relative;
+	display: block;
+	width: 90%;
+	margin: 0 auto;
+	transform: rotateZ(-90deg);
+}
+.Login-Note-Text {
+	position: absolute;
+	width: 45%;
+	margin: 0 auto;
+	top: 50%;
+	right: 0;
+	left: 0;
+	color: #EFEFEF;
+	font-size: 2vw;
+	line-height: 2.5vw;
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
