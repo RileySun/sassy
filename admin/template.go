@@ -2,8 +2,6 @@ package admin
 
 import(
 	"log"
-	"fmt"
-	"io/fs"
 	"embed"
 	"net/http"
 	"html/template"
@@ -14,36 +12,27 @@ import(
 //go:embed html/*
 var HTMLFiles embed.FS
 
+func (a *Admin) LoadLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/login.html")
+	if parseErr != nil {
+		log.Println("Template->LoadPage->Parse: ", parseErr)
+	}
+	
+	//Show Popup
+	tmpl.Execute(w, false)
+}
+
 func (a *Admin) LoadHome(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/index.html")
+	authErr := a.CheckSession(r)
+	if authErr != nil {
+		http.Redirect(w, r, "/login", http.StatusFound)	
+		return
+	}
+
+	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/home.html")
 	if parseErr != nil {
 		log.Println("Template->LoadHome->Parse: ", parseErr)
 	}
 	
 	tmpl.Execute(w, nil)
-}
-
-func (a *Admin) LoadPage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	page := ps.ByName("page")
-
-	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/" + page + ".html")
-	if parseErr != nil {
-		log.Println("Template->LoadPage->Parse: ", parseErr)
-	}
-	
-	tmpl.Execute(w, nil)
-}
-
-func (a *Admin) LoadLogin(redirect string) {
-	
-}
-
-func run() error {
-	return fs.WalkDir(HTMLFiles, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		fmt.Printf("path=%q, isDir=%v\n", path, d.IsDir())
-		return nil
-	})
 }

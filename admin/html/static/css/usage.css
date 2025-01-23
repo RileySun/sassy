@@ -1,0 +1,147 @@
+body, html {background:#262626; font-family:Helvetica; height:100vh; margin:0; position:relative; width:100vw}
+
+
+
+.Table-Container {
+	display: block;
+	width: 100%;
+}
+.Table-Header {
+	display: block;
+	width: 95%;
+	margin: 2.25% auto 2%;
+	text-align: center;
+}
+.Table-Title {
+	display: inline-block;
+	width: 89%;
+	margin: 0;
+	color: #EFEFEF;
+	text-align: left;
+	font-size: 3vw;
+	vertical-align: middle;
+}
+.Table-Add {
+	display: inline-block;
+	width: 5%;
+	vertical-align: middle;
+	background: #1d2d3a;
+	border-radius: 13px;
+	cursor:pointer;
+	transition: 1s background;
+}
+.Table-Add:hover {
+	background: #1e252e;
+}
+.Table-Top {
+	display: block;
+	width: 100%;
+	margin: 0 0 2% 0;
+	text-align: center;
+	
+}
+.Table-Search {
+	display: inline-block;
+	width: 27%;
+	padding: 1% 2%;
+	background: #1d2d3a;
+	color: #EFEFEF;
+	font-size: 1.75vw;
+	border: none;
+	outline: none !important;
+	border-radius: 13px;
+}
+.Table-Total {
+	display: inline-block;
+	width: 62%;
+	margin: 0;
+	color: #EFEFEF;
+	font-size: 2vw;
+	text-align: right;
+}
+.Table {
+	display:block;
+	width: 88%;
+	max-height: 65.92vh;
+	margin: 0 auto;
+	background: #1d2d3a;
+	color: #EFEFEF;
+	border: 10px solid #1e252e;
+	border-radius: 15px;
+	overflow-y: scroll;
+}
+.Table-Head {
+	padding: 1% 0;
+	background: #1e252e;
+	font-size: 1.5vw;
+	text-align: center;
+	cursor: pointer;
+}
+.Table-Head-Cell {
+	position: relative;
+	display: inline-block;
+	width: 16%;
+	margin: 0 0 0 0.5%;
+	text-align: left;
+	font-size: 1.5vw;
+}
+.Table-Sort::after {
+	content: '\25BC';
+	position: absolute;
+	top: -12%;
+	right: 7%;
+}
+.Table-Sort-ASC::after {
+	content:'\25B2';
+	position: absolute;
+	top: -12%;
+	right: 7%;
+}
+.Table-Body {
+	text-align: center;
+}
+.Table-Row {
+	display: block;
+	width: 100%;
+	margin: 0 auto;
+	background: #1d2d3a;
+	color: #EFEFEF;
+	border-bottom: 1px solid #3d4a5e;
+	transition: 1s background;
+}
+.Table-Row:last-child {
+	border: none;
+	border-radius: 0, 0, 13px 13px;
+}
+.Table-Row:hover {
+	background: #182631;
+}
+.Table-Empty {
+	padding: 1.5% 0;
+	font-size: 1.2vw;
+}
+.Table-Cell {
+	display: inline-block;
+	width: 16%;
+	max-width: 16%;
+	margin: 0 0 0 0.5%;
+	padding: 1.5% 0;
+	text-align: left;
+	font-size: 1.2vw;
+	vertical-align: middle;
+	overflow-x: scroll;
+}
+.Table-Cell-Small {
+	width: 10%;
+}
+.Table-Cell-Status {
+	width: fit-content;
+	padding: 3% 6%;
+	color: #D7D7D7;
+	text-align: center;
+}
+.Table-Link {
+	color: #697d9b;
+	text-decoration: none !important;
+	cursor: pointer;
+}

@@ -3,34 +3,39 @@
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>SassyAdmin - Home</title>
-		<link rel="stylesheet" href="login.css">
+		<link rel="apple-touch-icon" sizes="180x180" href="./static/apple-touch-icon.png">
+		<meta name="apple-mobile-web-app-title" content="Sassy Admin" />
+		<link rel="shortcut icon" href="./static/favicon.ico">
 		<style>a {color: #FFF;}</style><!--or links are blue at first-->
+		
+		<title>SassyAdmin - Login</title>
+		<link rel="stylesheet" href="./static/css/login.css">
 	</head>
 	
 	<body>
 		<div class="Page">
+			{{$PopupState := .}}
 			
 			<div class="Login">
-				<form class="Login-Form" onsubmit=""><!--ONSUBMIT FORM-->
-					<IMG class="Login-Form-IMG" src="./Assets/Ledger.svg" />
-					<h1 class="Login-Form-Title">Ledger</h1>
+				<form class="Login-Form" method="POST">
+					<IMG class="Login-Form-IMG" src="./static/img/Logo.svg" />
+					<h1 class="Login-Form-Title">Sassy Admin</h1>
 					<input name="user" class="Login-Input" type="text" placeholder="username" required />
 					<input name="pass" class="Login-Input" type="password" placeholder="*********" required />
 					<input class="Login-Submit" type="submit" value="Login" />
 				</form>
-				<div id="PopUp" class="Login-Popup-Container">
+				<div id="PopUp" class="Login-Popup-Container" {{if $PopupState}}style="display:block;"{{end}}>
 					<div class="Login-Popup-Overlay"></div>
 					<div class="Login-Popup">
-						<IMG class="Login-Popup-IMG" src="./Assets/${popUp.img}.svg" />
+						<IMG class="Login-Popup-IMG" src="./static/img/Error.svg" />
 						<div class="Login-Info">
-							<h1 class="Login-Popup-Title ${popUp.titleClass}">${popUp.title}</h1>
-							<div class="Login-Popup-Text">${popUp.message}</div>
+							<h1 class="Login-Popup-Title Login-Error">Error</h1>
+							<div class="Login-Popup-Text">Please check your login information and try again</div>
 						</div>
 					</div>
 				</div>
 				<div class="Login-Note">
-					<IMG class="Login-Note-IMG" src="./Assets/Note.svg" />
+					<IMG class="Login-Note-IMG" src="./static/img/Note.svg" />
 					<div class="Login-Note-Text">
 						janeD<br />prW4nj7KL
 					</div>
@@ -39,6 +44,8 @@
 		</div>
 	</body>
 	<script>
-	
+	{{if $PopupState}} 
+		window.setTimeout(() => {document.getElementById('PopUp').style.display = 'none'}, 2000);
+	{{end}}
 	</script>
 </html>

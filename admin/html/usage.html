@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<link rel="apple-touch-icon" sizes="180x180" href="./static/apple-touch-icon.png">
+		<meta name="apple-mobile-web-app-title" content="Sassy Admin" />
+		<link rel="shortcut icon" href="./static/favicon.ico">
+		<style>a {color: #FFF;}</style><!--or links are blue at first-->
+
+		<title>SassyAdmin - Usage</title>
+		<link rel="stylesheet" href="./static/css/usage.css">
+	</head>
+	
+	<body>
+		<div class="Page">		
+			<div class="Table-Container">
+				<div class="Table-Header">
+					<h1 class="Table-Title">Usage</h1>
+				</div>
+				<div class="Table-Top">
+					<input id="Search" class="Table-Search" type="search" placeholder="Search" onkeyup="search()" />
+				</div>
+				<div class="Table">
+					<div class="Table-Head">
+						<div class="Table-Head-Cell Table-Cell-Small" onclick="sort('ID')" >ID</div>
+						<div class="Table-Head-Cell" onclick="sort('Name')" >Name</div>
+						<div class="Table-Head-Cell Table-Cell-Small" onclick="sort('Trial')">Trial</div>
+						<div class="Table-Head-Cell Table-Cell-Small" onclick="sort('Get')">Get</div>
+						<div class="Table-Head-Cell Table-Cell-Small" onclick="sort('Add')">Add</div>
+						<div class="Table-Head-Cell Table-Cell-Small" onclick="sort('Update')">Update</div>
+						<div class="Table-Head-Cell Table-Cell-Small" onclick="sort('Delete')">Delete</div>
+					</div>
+					<div class="Table-Body" id="Table">
+						{{range .Data}}
+							<div class="Table-Row">
+								<div class="Table-Cell Table-Cell-Small" data-sort="ID">{{.ID}}</div>
+								<div class="Table-Cell" data-sort="Name">{{.Name}}</div>
+								<div class="Table-Cell Table-Cell-Small" data-sort="Trial">{{if .Trial}} Yes {{else}} No {{end}}</div>
+								<div class="Table-Cell Table-Cell-Small" data-sort="Get">{{.Get}}</div>
+								<div class="Table-Cell Table-Cell-Small" data-sort="Add">{{.Add}}</div>
+								<div class="Table-Cell Table-Cell-Small" data-sort="Update">{{.Update}}</div>
+								<div class="Table-Cell Table-Cell-Small" data-sort="Delete">{{.Delete}}</div>
+							</div>
+						{{end}}
+					</div>
+					
+				</div>
+			</div>
+		</div>
+		
+		<script>
+			//Data
+			const cells = Array.from(document.getElementById('Table').children);
+			
+			//Sorting
+			let ACS = true;
+			let sortKey = "ID";
+			function sort(newKey) {
+				//Changing Acsending or new sort
+				if (sortKey == newKey) {
+					ACS = !ACS
+				} else {
+					sortKey = newKey;
+				}
+				
+				//Sort
+				let sorted = cells.sort(sorter);
+				if (!ACS) {
+					sorted.reverse()
+				}
+				
+				//Render
+				document.getElementById('Table').innerHTML = "";
+				sorted.forEach(e => document.getElementById('Table').appendChild(e));
+			}	
+			function sorter(a, b) {
+				let aKey = a.querySelector('[data-sort="' + sortKey + '"]').innerHTML;
+				let bKey = b.querySelector('[data-sort="' + sortKey + '"]').innerHTML;
+				return aKey.localeCompare(bKey);
+			}
+			
+			//Search
+			function search() {
+				//Get Search Key
+				let key = document.getElementById('Search').value;
+				
+				//Search Data
+				let filtered
+				if (key == "") {
+					filtered = cells
+				} else {
+					let newData = Array.from(cells)
+					filtered = cells.filter((row) => {
+						let isIndexed = false
+						let columns = Array.from(row.children)
+						columns.forEach(e => {
+							if (e.innerHTML.indexOf(key) == 0) {
+								isIndexed = true
+							}
+						});
+						return isIndexed
+					});
+				}
+				
+				if (filtered.length == 0) {
+					document.getElementById('Table').innerHTML = '<div class="Table-Row"><div class="Table-Empty">No Entries Found</div></div>'
+					return
+				}
+				
+				//Render
+				document.getElementById('Table').innerHTML = "";
+				filtered.forEach(e => document.getElementById('Table').appendChild(e));
+			}
+		</script>
+	</body>
+</html>
