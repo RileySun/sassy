@@ -42,4 +42,7 @@ func (a *Admin) LoadRoutes() {
 	
 	//Usage
 	a.router.GET("/usage", a.LoadUsage)
+	
+	//Status
+	a.router.GET("/status", a.LoadStatus)
 }

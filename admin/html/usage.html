@@ -3,21 +3,26 @@
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<link rel="apple-touch-icon" sizes="180x180" href="./static/apple-touch-icon.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
 		<meta name="apple-mobile-web-app-title" content="Sassy Admin" />
-		<link rel="shortcut icon" href="./static/favicon.ico">
+		<link rel="shortcut icon" href="static/favicon.ico">
 		<style>a {color: #FFF;}</style><!--or links are blue at first-->
 
 		<title>SassyAdmin - Usage</title>
-		<link rel="stylesheet" href="./static/css/usage.css">
+		<link rel="stylesheet" href="static/css/usage.css">
 	</head>
 	
 	<body>
+		<div class="Menu">
+			<a class="Menu-Link" href="/">Home</a><!--
+			--><a class="Menu-Current">Usage</a><!--
+			--><a class="Menu-Link" href="/reports">Reports</a><!--
+			--><a class="Menu-Link" href="/status">Status</a><!--
+			--><a class="Menu-Link" href="/actions">Actions</a>
+		</div>
+		
 		<div class="Page">		
 			<div class="Table-Container">
-				<div class="Table-Header">
-					<h1 class="Table-Title">Usage</h1>
-				</div>
 				<div class="Table-Top">
 					<input id="Search" class="Table-Search" type="search" placeholder="Search" onkeyup="search()" />
 				</div>
@@ -95,7 +100,7 @@
 						let isIndexed = false
 						let columns = Array.from(row.children)
 						columns.forEach(e => {
-							if (e.innerHTML.indexOf(key) == 0) {
+							if (e.innerHTML.includes(key)) {
 								isIndexed = true
 							}
 						});

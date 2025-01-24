@@ -10,13 +10,11 @@ import(
 )
 
 func (a *Admin) LoadUsage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	/*
 	authErr := a.CheckSession(r)
 	if authErr != nil {
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}
-	*/
 
 	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/usage.html")
 	if parseErr != nil {

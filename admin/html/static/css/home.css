@@ -1,2 +1,54 @@
-body, html {background:#262626; font-family:Helvetica; height:100vh; margin:0; position:relative; width:100vw}
+body, html {background:#262626; font-family:Helvetica; margin:0; position:relative; width:100vw}
 
+.Home {
+	display: block;
+	width: 90%;
+	margin: 0 auto;
+}
+.Home-Header {
+	margin: 2% auto 0%;
+	text-align: center;
+}
+.Home-Logo {
+	display:  inline-block;
+	width: 6%;
+	vertical-align: middle;
+}
+.Home-Title {
+	display: inline-block;
+	margin: 0;
+	color: #E9E9E9;
+	font-size: 3vw;
+	text-align: center;
+	vertical-align: middle;
+}
+.Home-Container {
+	text-align: center;
+}
+.Home-Box {
+	display: inline-block;
+	width: 25%;
+	margin: 2% 2%;
+	padding: 3% 0;
+	background: #1d2d3a;
+	color: #E9E9E9;
+	text-align: center;
+	text-decoration: none !important;
+	vertical-align: middle;
+	border-radius: 1.5vw;
+	transition: background 0.5s ease-in;
+}
+.Home-Box:hover {
+	background: #1e252e;
+}
+.Home-Box-IMG {
+	display: block;
+	width: 30%;
+	margin: 0% auto;
+}
+.Home-Box-Title {
+	margin: 1% 0;
+	text-align: center;
+	font-size: 3vw;
+	font-weight: 300;
+}

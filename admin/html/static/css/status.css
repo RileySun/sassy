@@ -1,0 +1,85 @@
+body, html {background:#262626; font-family:Helvetica; margin:0; position:relative; width:100vw}
+
+.Menu {
+	display: block;
+	width: 60%;
+	margin: 2% auto;
+	padding: 1.2% 0;
+	text-align: center;
+	background: #1e252e;
+	border-radius: 1.5vw;
+}
+.Menu-Link, .Menu-Current {
+	margin: 0 3%;
+	color: #E9E9E9;
+	font-size: 2.5vw;
+	font-weight: 100;
+	text-decoration: none !important;
+	transition: color 0.5s ease-in;
+	cursor: pointer;
+}
+.Menu-Link:hover, .Menu-Current {
+	color: #697d9b;
+}
+
+.Status {
+	
+}
+.Status-Header {
+	color: #E9E9E9;
+	text-align: center;
+	font-size: 2vw;
+	font-weight: 200;
+}
+.Status-Box {
+	display: block;
+	width: 50%;
+	margin: 2% auto;
+	padding: 1% 0;
+	background: #1e252e;
+	border 2px solid #1d2d3a;
+	border-radius: 1.5vw;
+	transition: background 0.5s ease-in;
+}
+.Status-Box:hover {
+	background: #1d2d3a;
+}
+.Status-Left {
+	display: inline-block;
+	width: 85%;
+	margin: 0;
+	vertical-align: middle;
+}
+.Status-Title {
+	display: inline-block;
+	color: #E9E9E9;
+	margin: 0 0 0 5%;
+	font-size: 3vw;
+	font-weight: 300;
+}
+.Status-Text {
+	display: inline-block;
+	color: #E9E9E9;
+	margin: 0 0 0 2%;
+	font-size: 1.5vw;
+	font-weight: 300;
+}
+.Status-Time {
+	font-weight: 600;
+}
+.Status-IMG {
+	display: inline-block;
+	width: 7%;
+	margin: 0;
+	vertical-align: middle;
+	border-radius: 100%;
+}
+.Status-OK {
+	border: 0.25vw solid #00B32D;
+}
+.Status-Slow {
+	border: 0.25vw solid #FEED34;
+}
+.Status-Error {
+	border: 0.25vw solid #C00C00;
+}

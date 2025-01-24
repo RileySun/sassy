@@ -1,4 +1,26 @@
-body, html {background:#262626; font-family:Helvetica; height:100vh; margin:0; position:relative; width:100vw}
+body, html {background:#262626; font-family:Helvetica; margin:0; position:relative; width:100vw}
+
+.Menu {
+	display: block;
+	width: 60%;
+	margin: 2% auto;
+	padding: 1.2% 0;
+	text-align: center;
+	background: #1e252e;
+	border-radius: 1.5vw;
+}
+.Menu-Link, .Menu-Current {
+	margin: 0 3%;
+	color: #E9E9E9;
+	font-size: 2.5vw;
+	font-weight: 100;
+	text-decoration: none !important;
+	transition: color 0.5s ease-in;
+	cursor: pointer;
+}
+.Menu-Link:hover, .Menu-Current {
+	color: #697d9b;
+}
 
 
 
@@ -62,7 +84,7 @@ body, html {background:#262626; font-family:Helvetica; height:100vh; margin:0; p
 .Table {
 	display:block;
 	width: 88%;
-	max-height: 65.92vh;
+	max-height: 62vh;
 	margin: 0 auto;
 	background: #1d2d3a;
 	color: #EFEFEF;
