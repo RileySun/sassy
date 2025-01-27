@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+		<meta name="apple-mobile-web-app-title" content="Sassy Admin" />
+		<link rel="shortcut icon" href="static/favicon.ico">
+		<style>a {color: #FFF;}</style><!--or links are blue at first-->
+
+		<title>SassyAdmin - Reports</title>
+		<link rel="stylesheet" href="static/css/reports.css">
+	</head>
+	
+	<body>
+		<div class="Menu">
+			<a class="Menu-Link" href="/">Home</a><!--
+			--><a class="Menu-Link" href="/usage">Usage</a><!--
+			--><a class="Menu-Current" href="/">Reports</a><!--
+			--><a class="Menu-Link" href="/status">Status</a><!--
+			--><a class="Menu-Link" href="/actions">Actions</a>
+		</div>
+		
+		<div class="Page">
+			<div class="Page-Title">API Monthly Report</div>
+			<div class="Reports">
+				<div class="Tab-Menu">
+					<div class="Tab-Menu-Button" onclick="changeTab('Total')">Total Usage</div>
+					<div class="Tab-Menu-Button" onclick="changeTab('Average')">Average Usage</div>
+					<div class="Tab-Menu-Button" onclick="changeTab('Users')">Top Users</div>
+					<div class="Tab-Menu-Button" onclick="changeTab('Revenue')">Revenue</div>
+					<div class="Tab-Menu-Button" onclick="changeTab('Chart')">Chart</div>
+				</div><!--
+			--><div id="Tab-Container" class="Tab-Container">
+					<div id="Total" class="Tab">
+						<div class="Tab-Item">
+							<div class="Tab-Item-Label">Total Monthly Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.Total}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Monthly Get Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.Get}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Monthly Add Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.Add}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Monthly Update Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.Update}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Monthly Delete Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.Delete}}</div>
+						</div>
+					</div>
+					
+					<div id="Average" class="Tab">
+						<div class="Tab-Item">
+							<div class="Tab-Item-Label">Total Average Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.AvgTotal}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Average Get Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.AvgGet}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Average Add Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.AvgAdd}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Average Update Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.AvgUpdate}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Average Delete Usage:</div><!--
+						 --><div class="Tab-Item-Value">{{.AvgDelete}}</div>
+						</div>
+					</div>
+					
+					<div id="Users" class="Tab">
+						<div class="Tab-Item">
+							<div class="Tab-Item-Label">Top Usage User:</div><!--
+						 --><div class="Tab-Item-Value">{{.TopAll.Name}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Top Get User:</div><!--
+						 --><div class="Tab-Item-Value">{{.TopGet.Name}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Top Add User:</div><!--
+						 --><div class="Tab-Item-Value">{{.TopAdd.Name}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Top Update User:</div><!--
+						 --><div class="Tab-Item-Value">{{.TopUpdate.Name}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Top Delete User:</div><!--
+						 --><div class="Tab-Item-Value">{{.TopDelete.Name}}</div>
+						</div>
+					</div>
+					
+					<div id="Revenue" class="Tab">
+						<div class="Tab-Item">
+							<div class="Tab-Item-Label">Get Revenue:</div><!--
+						 --><div class="Tab-Item-Value">${{.RevGet}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Add Revenue:</div><!--
+						 --><div class="Tab-Item-Value">${{.RevAdd}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Update Revenue:</div><!--
+						 --><div class="Tab-Item-Value">${{.RevUpdate}}</div>
+						</div><!--
+					 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Delete Revenue:</div><!--
+						 --><div class="Tab-Item-Value">${{.RevDelete}}</div>
+						</div><!--
+				 	 --><div class="Tab-Item">
+							<div class="Tab-Item-Label">Total Revenue:</div><!--
+					 	--><div class="Tab-Item-Value">${{.RevTotal}}</div>
+						</div>
+					</div>
+					
+					<div id="Chart" class="Tab">
+						<IMG id="Chart" class="Tab-IMG" src="data:image/png;base64,{{.Chart}}" />
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script>
+			//Data
+			const tabs = Array.from(document.getElementById('Tab-Container').children);
+			
+			//document.getElementById('Chart').src = "data:image/png;base64,{{.Chart}}";
+			
+			function changeTab(newTab) {
+				tabs.forEach((t) => {t.style.display = "none";});
+				
+				document.getElementById(newTab).style.display = "block";
+			}
+		</script>
+	</body>
+</html>

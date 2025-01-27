@@ -8,37 +8,61 @@
 		<link rel="shortcut icon" href="static/favicon.ico">
 		<style>a {color: #FFF;}</style><!--or links are blue at first-->
 
-		<title>SassyAdmin - Home</title>
-		<link rel="stylesheet" href="static/css/home.css">
+		<title>SassyAdmin - Actions</title>
+		<link rel="stylesheet" href="static/css/actions.css">
 	</head>
 	
 	<body>
-		<div class="Page">
-			
-			<div class="Home">
-				<div class="Home-Header">
-					<IMG class="Home-Logo" src="static/img/Logo.svg" />
-					<h1 class="Home-Title">Sassy Admin</h1>
-				</div>
+		<div class="Menu">
+			<a class="Menu-Link" href="/">Home</a><!--
+			--><a class="Menu-Link" href="/usage">Usage</a><!--
+			--><a class="Menu-Link" href="/reports">Reports</a><!--
+			--><a class="Menu-Link" href="/status">Status</a><!--
+			--><a class="Menu-Current" href="/actions">Actions</a>
+		</div>
+		
+		<div class="Page">	
+			<div class="Actions">
+				<div class="Actions-Header">Server Actions</div>
 				
-				<div class="Home-Container">
-					<a class="Home-Box" href="/usage">
-						<IMG class="Home-Box-IMG" src="static/img/Usage.svg" />
-						<h3 class="Home-Box-Title">Usage</h3>
-					</a><!--
-					--><a class="Home-Box" href="/reports">
-						<IMG class="Home-Box-IMG" src="static/img/Reports.svg" />
-						<h3 class="Home-Box-Title">Reports</h3>
-					</a>
-					<br>
-					<a class="Home-Box" href="/status">
-						<IMG class="Home-Box-IMG" src="static/img/Status.svg" />
-						<h3 class="Home-Box-Title">Status</h3>
-					</a><!--
-					--><a class="Home-Box" href="/actions">
-						<IMG class="Home-Box-IMG" src="static/img/Actions.svg" />
-						<h3 class="Home-Box-Title">Actions</h3>
-					</a>
+				<div class="Actions-Box">
+					<div class="Actions-Label">API Server Actions</div>
+					<form class="Actions-Form" method="POST">
+						<input type="hidden" name="Action" value="Restart" />
+						<input type="hidden" name="Type" value="API" />
+						<input type="submit" class="Actions-Button" value="Restart" />
+					</form>
+					<form class="Actions-Form" method="POST">
+						<input type="hidden" name="Action" value="Shutdown" />
+						<input type="hidden" name="Type" value="API" />
+						<input type="submit" class="Actions-Button" value="Shutdown" />
+					</form>
+				</div><!--
+			 --><div class="Actions-Box">
+					<div class="Actions-Label">Auth Server Actions</div>
+					<form class="Actions-Form" method="POST">
+						<input type="hidden" name="Action" value="Restart" />
+						<input type="hidden" name="Type" value="Auth" />
+						<input type="submit" class="Actions-Button" value="Restart" />
+					</form>
+					<form class="Actions-Form" method="POST">
+						<input type="hidden" name="Action" value="Shutdown" />
+						<input type="hidden" name="Type" value="Auth" />
+						<input type="submit" class="Actions-Button" value="Shutdown" />
+					</form>
+				</div><!--
+			 --><div class="Actions-Box">
+					<div class="Actions-Label">Admin Server Actions</div>
+					<form class="Actions-Form" method="POST" name="Restart">
+						<input type="hidden" name="Action" value="Restart" />
+						<input type="hidden" name="Type" value="Admin" />
+						<input type="submit" class="Actions-Button" value="Restart" />
+					</form>
+					<form class="Actions-Form" method="POST">
+						<input type="hidden" name="Action" value="Shutdown" />
+						<input type="hidden" name="Type" value="Admin" />
+						<input type="submit" class="Actions-Button" value="Shutdown" />
+					</form>
 				</div>
 			</div>
 		</div>

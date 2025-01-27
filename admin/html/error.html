@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<link rel="apple-touch-icon" sizes="180x180" href="./static/apple-touch-icon.png">
+		<meta name="apple-mobile-web-app-title" content="Sassy Admin" />
+		<link rel="shortcut icon" href="./static/favicon.ico">
+		<style>a {color: #FFF;}</style><!--or links are blue at first-->
+		
+		<title>SassyAdmin - Error</title>
+		<link rel="stylesheet" href="./static/css/error.css">
+	</head>
+	
+	<body>
+		<div class="Menu">
+			<a class="Menu-Link" href="/">Home</a><!--
+			--><a class="Menu-Link" href="/usage">Usage</a><!--
+			--><a class="Menu-Link" href="/reports">Reports</a><!--
+			--><a class="Menu-Link" href="/status">Status</a><!--
+			--><a class="Menu-Current" href="/actions">Actions</a>
+		</div>
+		
+		<div class="Page">	
+			<div class="Error">
+				<IMG class="Error-IMG" src="./static/img/Error.svg" /><!--
+			 --><div class="Error-Side">
+			 		<div class="Error-Title">Error</div>
+					<div class="Error Message">
+						A serious error has occured with the {{.ActionType}} server action , could not complete the {{.Action}}.
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

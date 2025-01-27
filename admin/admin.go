@@ -11,11 +11,15 @@ type Admin struct {
 	API *api.API
 	router *httprouter.Router
 	Sessions map[string]*Session
+	
+	ApiAction func(string)
+	AuthAction func(string)
+	AdminAction func(string)
 }
 
-func NewAdmin(newAPI *api.API) *Admin {
+func NewAdmin() *Admin {
 	admin := &Admin{
-		API:newAPI,
+		API:api.NewAPI(),
 		router:httprouter.New(),
 		Sessions: make(map[string]*Session),
 	}
@@ -45,4 +49,15 @@ func (a *Admin) LoadRoutes() {
 	
 	//Status
 	a.router.GET("/status", a.LoadStatus)
+	
+	//Reports
+	a.router.GET("/reports", a.LoadReports)
+	
+	//Actions
+	a.router.GET("/actions", a.LoadActions)
+	a.router.POST("/actions", a.DoAction)
+	
+	//Waiting
+	a.router.GET("/waiting", a.LoadWaiting)
+	a.router.GET("/error", a.LoadError)
 }

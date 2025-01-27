@@ -1,9 +1,8 @@
-package main
+package api
 
 import(
-	"api"
-	
 	"log"
+	"math"
 	"sort"
 	"time"
 	"bytes"
@@ -20,13 +19,13 @@ const TRANSACTION_COST = 0.001
 //structs
 type Report struct {
 	//Internal
-	API *api.API
-	Users []*api.User
+	API *API
+	Users []*User
 	
 	//Metrics
 	Total, Get, Add, Update, Delete int
 	AvgTotal, AvgGet, AvgAdd, AvgUpdate, AvgDelete int
-	TopAll, TopGet, TopAdd, TopUpdate, TopDelete *api.User
+	TopAll, TopGet, TopAdd, TopUpdate, TopDelete *User
 	RevTotal, RevGet, RevAdd, RevUpdate, RevDelete, RevAvg float64
 	
 	//PDF
@@ -34,13 +33,13 @@ type Report struct {
 }
 
 //Create
-func NewReport() *Report {
+func (a *API) NewReport() *Report {
 	report := &Report{
-		API:api.NewAPI(),
+		API:a,
 	}
 	
 	report.Coallate()
-	report.Generate()
+	//report.Generate() User's Choice to call
 	
 	return report
 }
@@ -88,7 +87,7 @@ func (r *Report) Generate() {
 }
 
 //Coallate
-func (r *Report) getAllUsers() ([]*api.User, error) {
+func (r *Report) getAllUsers() ([]*User, error) {
 	//get all usage data
 	users, userErr := r.API.GetAllUsers()
 	if userErr != nil {
@@ -123,9 +122,9 @@ func (r *Report) getAverageUsage() (int, int, int, int, int) {
 	return avgAll, avgGet, avgAdd, avgUpdate, avgDelete
 }
 
-func (r *Report) getTopUsers() (*api.User, *api.User, *api.User, *api.User, *api.User) {
+func (r *Report) getTopUsers() (*User, *User, *User, *User, *User) {
 	//Get Top User of All Routes
-	var topAll, topGet, topAdd, topUpdate, topDelete *api.User
+	var topAll, topGet, topAdd, topUpdate, topDelete *User
 	topInt := 0
 	for _, u := range r.Users {
 		total := u.Get + u.Add + u.Update + u.Delete
@@ -136,7 +135,7 @@ func (r *Report) getTopUsers() (*api.User, *api.User, *api.User, *api.User, *api
 	}
 	
 	//Clone r.Users
-	usersClone := append([]*api.User{}, r.Users...)
+	usersClone := append([]*User{}, r.Users...)
 	
 	//Get Top Get by sorting
 	sort.Slice(usersClone, func(i, j int) bool {
@@ -168,12 +167,20 @@ func (r *Report) getTopUsers() (*api.User, *api.User, *api.User, *api.User, *api
 func (r *Report) getRevenue() (float64, float64, float64, float64, float64, float64) {
 	userCount := len(r.Users)
 	
-	revAll := float64(r.Total) * TRANSACTION_COST
-	revGet := float64(r.Get) * TRANSACTION_COST
-	revAdd := float64(r.Add) * TRANSACTION_COST
-	revUpdate := float64(r.Update) * TRANSACTION_COST
-	revDelete := float64(r.Delete) * TRANSACTION_COST
-	revAvg := revAll/float64(userCount)
+	rawAll := float64(r.Total) * TRANSACTION_COST
+	rawGet := float64(r.Get) * TRANSACTION_COST
+	rawAdd := float64(r.Add) * TRANSACTION_COST
+	rawUpdate := float64(r.Update) * TRANSACTION_COST
+	rawDelete := float64(r.Delete) * TRANSACTION_COST
+	rawAvg := rawAll/float64(userCount)
+	
+	revAll := math.Floor(rawAll * 10000) / 10000
+	revGet := math.Floor(rawGet * 10000) / 10000
+	revAdd := math.Floor(rawAdd * 10000) / 10000
+	revUpdate := math.Floor(rawUpdate * 10000) / 10000
+	revDelete := math.Floor(rawDelete * 10000) / 10000
+	revAvg := math.Floor(rawAvg * 10000) / 10000
+	
 	
 	return revAll, revGet, revAdd, revUpdate, revDelete, revAvg
 }
