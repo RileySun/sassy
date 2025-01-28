@@ -29,46 +29,39 @@ func (a *Admin) DoAction(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	r.ParseForm()
 	actionType := r.PostFormValue("Type")
 	action := r.PostFormValue("Action")
+	actionString := actionType + "_" + action
 	
-	//Add to header for waiting page and errors
-	newCookie := &http.Cookie{
-		Name:"Action",
-		Value:actionType + "-" + action,
-		Path:"/",
-		MaxAge:-1,
-	}
-	http.SetCookie(w, newCookie)
-	
+	//Check function exists before we send to right page
 	ok := true
 	var errorMessage = ""
 	switch actionType {
 		case "API":
-			if a.ApiAction != nil {
-				a.ApiAction(action)
-			} else {
+			if a.ApiAction == nil {
 				ok = false
 				errorMessage = "Template->DoAction->API->" + action + ": Action for API does not exist."
+			} else {
+				a.ApiAction(action)
 			}
 		case "Auth":
-			if a.AuthAction != nil {
-				a.AuthAction(action)
-			} else {
+			if a.AuthAction == nil {
 				ok = false
 				errorMessage = "Template->DoAction->Auth->" + action + ": Action for Auth does not exist."
+			} else {
+				a.AuthAction(action)
 			}
 		case "Admin":
-			if a.AdminAction != nil {
-				a.AdminAction(action)
-			} else {
+			if a.AdminAction == nil{
 				ok = false
 				errorMessage = "Template->DoAction->Admin->" + action + ": Action for Admin does not exist."
+			} else {
+				a.AdminAction(action)
 			}
 	}
 	
 	if ok {
-		http.Redirect(w, r, "/waiting", http.StatusFound)	
+		http.Redirect(w, r, "/waiting/" + actionString, http.StatusFound)	
 	} else {
 		log.Println(errors.New(errorMessage))
-		http.Redirect(w, r, "/error", http.StatusFound)	
+		http.Redirect(w, r, "/error/" + actionString, http.StatusFound)	
 	}
 }

@@ -2,6 +2,7 @@ package admin
 
 import(	
 	"log"
+	"strings"
 	"net/http"
 	"html/template"
 	"github.com/julienschmidt/httprouter"
@@ -43,21 +44,21 @@ func (a *Admin) LoadError(w http.ResponseWriter, r *http.Request, ps httprouter.
 		return
 	}
 	*/
-	
-	cookie, err := w.Cookie("Action")
-	if err != nil {
-		log.Println("Template->LoadError->Cookie:", err)
+	actionString := ps.ByName("action")
+	splits := strings.Split(actionString, "_")
+	var action, actionType string
+	if len(splits) < 2 {
+		log.Println("Template->LoadError->ActionString: Action Parse Error", actionString, splits)
+		action, actionType = "Error", "Error"
+	} else {
+		action, actionType = splits[0], splits[1]
 	}
-	log.Println(cookie)
+	
 
-	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/error.html")
+	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/waiting.html")
 	if parseErr != nil {
 		log.Println("Template->LoadError->Parse: ", parseErr)
 	}
-	
-	//Get Action Data
-	actionType := r.Header.Get("Action")
-	action := r.Header.Get("Action-Type")
 	
 	//Template Data
 	templateData := struct {

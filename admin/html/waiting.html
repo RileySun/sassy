@@ -5,11 +5,11 @@
 		<meta name="viewport" content="width=device-width,initial-scale=1">
 		<link rel="apple-touch-icon" sizes="180x180" href="./static/apple-touch-icon.png">
 		<meta name="apple-mobile-web-app-title" content="Sassy Admin" />
-		<link rel="shortcut icon" href="./static/favicon.ico">
+		<link rel="shortcut icon" href="../static/favicon.ico">
 		<style>a {color: #FFF;}</style><!--or links are blue at first-->
 		
-		<title>SassyAdmin - Error</title>
-		<link rel="stylesheet" href="../static/css/error.css">
+		<title>SassyAdmin - Waiting</title>
+		<link rel="stylesheet" href="../static/css/waiting.css">
 	</head>
 	
 	<body>
@@ -22,13 +22,12 @@
 		</div>
 		
 		<div class="Page">	
-			<div class="Error">
-				<IMG class="Error-IMG" src="../static/img/Error.svg" /><!--
-			 --><div class="Error-Side">
-			 		<div class="Error-Title">Error</div>
-					<div class="Error-Message">
-						A serious error has occured with the <b>{{.Action}}</b> server action, could not complete the <b>{{.ActionType}}</b>.<br>
-						Please contact support to help resolve this issue.
+			<div class="Waiting">
+				<div class="Loader"></div><!--
+			 --><div class="Waiting-Side">
+			 		<div class="Waiting-Title">Waiting</div>
+					<div class="Waiting-Message">
+						Please wait for the action to finish.
 					</div>
 				</div>
 			</div>

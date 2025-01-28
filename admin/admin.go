@@ -1,16 +1,24 @@
 package admin
 
 import(
-	"log"
 	"api"
+	
+	"log"
+	//"time"
+	"context"
 	"net/http"
+	
 	"github.com/julienschmidt/httprouter"
 )
 
 type Admin struct {
+	Server *http.Server
 	API *api.API
 	router *httprouter.Router
 	Sessions map[string]*Session
+	
+	Status string
+	PID int
 	
 	ApiAction func(string)
 	AuthAction func(string)
@@ -22,17 +30,17 @@ func NewAdmin() *Admin {
 		API:api.NewAPI(),
 		router:httprouter.New(),
 		Sessions: make(map[string]*Session),
+		Status:"None",
 	}
 	
 	admin.LoadRoutes()
-	admin.LaunchServer()
-	
+
 	return admin
 }
 
 func (a *Admin) LaunchServer() {
 	a.router.ServeFiles("/static/*filepath", http.Dir("./admin/html/static"))
-	log.Fatal(http.ListenAndServe("localhost:9090", a.router))
+	a.Server = startHTTPServer(a.router)
 }
 
 func (a *Admin) LoadRoutes() {	
@@ -58,6 +66,21 @@ func (a *Admin) LoadRoutes() {
 	a.router.POST("/actions", a.DoAction)
 	
 	//Waiting
-	a.router.GET("/waiting", a.LoadWaiting)
-	a.router.GET("/error", a.LoadError)
+	a.router.GET("/waiting/:action", a.LoadWaiting)
+	a.router.GET("/error/:action", a.LoadError)
+}
+
+//Manage Server
+func (a *Admin) Shutdown() {
+	log.Println("Server is shutting down...")
+
+	// timeout could be given instead of nil as a https://golang.org/pkg/context/
+	if err := a.Server.Shutdown(context.Background()); err != nil {
+		log.Println("Admin->Shutdown: ", err)
+	}
+}
+
+func (a *Admin) Restart() {
+	a.Shutdown()
+	a.LaunchServer()
 }

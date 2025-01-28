@@ -22,7 +22,7 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 	color: #697d9b;
 }
 
-.Error {
+.Waiting {
 	display: block;
 	width: 74%;
 	margin: 0 auto;
@@ -30,26 +30,54 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 	background: #1e252e;
 	border-radius: 1.25vw;
 }
-.Error-IMG {
+.Waiting-IMG {
 	display: inline-block;
 	width: 15%;
 	vertical-align: middle;
 }
-.Error-Side {
+.Waiting-Side {
 	display: inline-block;
 	width: 85%;
 	vertical-align: middle;
 }
-.Error-Title {
+.Waiting-Title {
 	margin: 0 0 2%;
 	color: #E9E9E9;
 	text-align: center;
 	font-size: 3vw;
 }
-.Error-Message {
+.Waiting-Message {
 	color: #E9E9E9;
 	text-align: center;
 	font-size: 1.5vw;
 	font-weight: 100;
 	line-height: 2vw;
+}
+
+.Loader {
+	display: inline-block;
+	margin: 0 auto;
+	width: 15%;
+	vertical-align: middle;
+}
+.Loader::after {
+    content: "";
+    display: block;
+    width: 3.5vw;
+    height: 3.5vw;
+    margin: 3% auto;
+	border-bottom: 16px solid #1d2d3a;
+	border-top: 16px solid #1d2d3a;
+	border-right: 16px solid #E9E9E9;
+	border-left: 16px solid #E9E9E9;
+    border-radius: 100%;
+    animation: spin 1s infinite;
+}
+@keyframes spin {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(-360deg);}
+}
+@-webkit-keyframes spin {
+    0% {-webkit-transform: rotate(0deg); }
+    100% {-webkit-transform: rotate(-360deg);}
 }
