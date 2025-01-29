@@ -1,8 +1,6 @@
-
-notes
 .DS_Store
 /RAW
 /api/assets
-api/debug.go
+/auth/assets
 TODO.txt
 Report.pdf

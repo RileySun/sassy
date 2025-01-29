@@ -4,11 +4,14 @@ go 1.22.4
 
 replace api => ./api
 
+replace auth => ./auth
+
 replace admin => ./admin
 
 require (
 	admin v0.0.0-00010101000000-000000000000
 	api v0.0.0-00010101000000-000000000000
+	auth v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
 	github.com/julienschmidt/httprouter v1.3.0
 )
@@ -23,6 +26,6 @@ require (
 	github.com/signintech/gopdf v0.29.2 // indirect
 	github.com/vicanso/go-charts/v2 v2.6.10 // indirect
 	github.com/wcharczuk/go-chart/v2 v2.1.0 // indirect
-	golang.org/x/crypto v0.29.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect
 )

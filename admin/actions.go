@@ -39,22 +39,11 @@ func (a *Admin) DoAction(w http.ResponseWriter, r *http.Request, ps httprouter.P
 			if a.ApiAction == nil {
 				ok = false
 				errorMessage = "Template->DoAction->API->" + action + ": Action for API does not exist."
-			} else {
-				a.ApiAction(action)
 			}
 		case "Auth":
 			if a.AuthAction == nil {
 				ok = false
 				errorMessage = "Template->DoAction->Auth->" + action + ": Action for Auth does not exist."
-			} else {
-				a.AuthAction(action)
-			}
-		case "Admin":
-			if a.AdminAction == nil{
-				ok = false
-				errorMessage = "Template->DoAction->Admin->" + action + ": Action for Admin does not exist."
-			} else {
-				a.AdminAction(action)
 			}
 	}
 	

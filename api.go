@@ -2,10 +2,12 @@ package main
 
 import(
 	"api"
+	"auth"
 	
 	"log"
 	"fmt"
 	"errors"
+	"context"
 	"strconv"
 	"strings"
 	"net/http"
@@ -13,31 +15,34 @@ import(
 	"github.com/julienschmidt/httprouter"
 )
 
-type Server struct {
+type ApiServer struct {
+	Server *http.Server
 	API *api.API
-	Auth *api.Auth
+	Auth *auth.Auth
 	Routes *api.Routes
 	
 	router *httprouter.Router
 }
 
 //Create
-func NewServer() *Server {
-	server := &Server{
+func NewApiServer() *ApiServer {
+	server := &ApiServer{
 		API:api.NewAPI(),
-		Auth:api.NewAuth(),
+		Auth:auth.NewAuth(),
 		router:httprouter.New(),
 	}
 	server.Routes = server.API.NewRoutes()
+	server.LoadRoutes()
 	
 	return server
 }
 
-//Launch
-func (s *Server) Launch() {
-	//Auth
-	s.router.POST("/token/generate", s.GenerateAccessToken)
-	
+//Manage
+func (s *ApiServer) LaunchServer() {
+	s.Server = startHTTPServer(s.router, "7070")
+}
+
+func (s *ApiServer) LoadRoutes() {	
 	//Models
 	s.router.GET("/model/get/:modelID", s.GetModel)
 	s.router.POST("/model/add", s.AddModel)
@@ -60,7 +65,24 @@ func (s *Server) Launch() {
 	s.router.GET("/", Error404)
 
 	//Launch
-	log.Fatal(http.ListenAndServe("localhost:8080", s.router))
+	
+}
+
+func (s *ApiServer) Shutdown() {
+	log.Println("API Server is shutting down...")
+
+	if err := s.Server.Shutdown(context.Background()); err != nil {
+		log.Println("API->Shutdown: ", err)
+	}
+}
+
+func (s *ApiServer) Action(action string) {
+	if action == "Shutdown" {
+		s.Shutdown()
+	} else {
+		s.Shutdown()
+		s.LaunchServer()
+	}
 }
 
 //Invalid
@@ -68,8 +90,8 @@ func Error404(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
     fmt.Fprint(w, "Invalid API call")
 }
 
-//Authentication (I think a seperate server would be better for this)
-func (s *Server) CheckAuthentication(r *http.Request) (int, error) {
+//Authentication (How do I decouple this without causing another request check...)
+func (s *ApiServer) CheckAuthentication(r *http.Request) (int, error) {
 	Oauth := r.Header["Authorization"]
 	
 	//dont split before u check it exists
@@ -99,23 +121,8 @@ func (s *Server) CheckAuthentication(r *http.Request) (int, error) {
 	return userID, nil
 } //checks authorization and returns userID
 
-func (s *Server) GenerateAccessToken(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	r.ParseForm()
-	refreshToken := r.PostFormValue("refresh_token")
-	if refreshToken == "" {
-		w.Write([]byte("Invalid Refresh Token"))
-		return
-	}
-	
-	accessToken, tokenErr := s.Auth.GenerateToken(refreshToken)
-	if tokenErr != nil {
-		w.Write([]byte(tokenErr.Error()))
-	}
-	w.Write([]byte(accessToken))
-}
-
 //Models
-func (s *Server) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -138,7 +145,7 @@ func (s *Server) GetModel(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}
 } //API/Model/Get GET
 
-func (s *Server) AddModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) AddModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -161,7 +168,7 @@ func (s *Server) AddModel(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}
 } //API/Model/Add POST
 
-func (s *Server) UpdateModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) UpdateModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -185,7 +192,7 @@ func (s *Server) UpdateModel(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 } //API/Model/Update POST
 
-func (s *Server) DeleteModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) DeleteModel(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Get User
 	userID := 1
 	
@@ -205,7 +212,7 @@ func (s *Server) DeleteModel(w http.ResponseWriter, r *http.Request, ps httprout
 } //API/Model/Delete GET?
 
 //Images
-func (s *Server) GetImages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) GetImages(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -228,7 +235,7 @@ func (s *Server) GetImages(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 } //API/Image/Get GET
 
-func (s *Server) AddImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) AddImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -252,7 +259,7 @@ func (s *Server) AddImage(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}
 } //API/Image/Add POST
 
-func (s *Server) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -277,7 +284,7 @@ func (s *Server) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 } //API/Image/Update POST
 
-func (s *Server) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -301,7 +308,7 @@ func (s *Server) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprout
 } //API/Image/Delete GET?
 
 //Videos
-func (s *Server) GetVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) GetVideos(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -325,7 +332,7 @@ func (s *Server) GetVideos(w http.ResponseWriter, r *http.Request, ps httprouter
 	//
 } //API/Video/Get POST
 
-func (s *Server) AddVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) AddVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -349,7 +356,7 @@ func (s *Server) AddVideo(w http.ResponseWriter, r *http.Request, ps httprouter.
 	}
 } //API/Video/Add POST
 
-func (s *Server) UpdateVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) UpdateVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {
@@ -374,7 +381,7 @@ func (s *Server) UpdateVideo(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 } //API/Video/Update POST
 
-func (s *Server) DeleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (s *ApiServer) DeleteVideo(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Check Auth and Get UserID
 	userID, authErr := s.CheckAuthentication(r)
 	if authErr != nil {

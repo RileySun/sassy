@@ -6,12 +6,13 @@ import(
 	"net/http"
 )
 
-var server *Server
+var server *ApiServer
 
 //Main
 func TestMain(m *testing.M) {	
 	//This one
-	server = NewServer()
+	server = NewApiServer()
+	server.LaunchServer()
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }

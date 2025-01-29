@@ -14,10 +14,6 @@ var testVideo *Video
 
 //Main
 func TestMain(m *testing.M) {
-	//Others
-	AuthTestInit()
-	
-	//This one
 	api = NewAPI()
 	exitCode := m.Run()
 	os.Exit(exitCode)

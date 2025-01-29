@@ -2,21 +2,20 @@ package main
 
 import(
 	
-	"admin"
 )
 
 func main() {
-	newAdmin := admin.NewAdmin()
+	apiServer := NewApiServer()
+	authServer := NewAuthServer()
+	adminServer := NewAdminServer()
 	
-	newAdmin.ApiAction = func(actionType string) {
-		if actionType == "Shutdown" {
-			newAdmin.Shutdown()
-		} else {
-			newAdmin.Restart()
-		}
-	}
-	
-	newAdmin.LaunchServer()
+	//Must interconnect these before launch
+	adminServer.Admin.ApiAction = apiServer.Action
+	adminServer.Admin.AuthAction = authServer.Action
+
+	apiServer.LaunchServer()
+	authServer.LaunchServer()
+	adminServer.LaunchServer()
 	
 	for true {
 		

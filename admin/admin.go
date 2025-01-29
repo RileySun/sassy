@@ -17,12 +17,11 @@ type Admin struct {
 	router *httprouter.Router
 	Sessions map[string]*Session
 	
+	ActionServer string
 	Status string
-	PID int
 	
 	ApiAction func(string)
 	AuthAction func(string)
-	AdminAction func(string)
 }
 
 func NewAdmin() *Admin {
@@ -30,7 +29,7 @@ func NewAdmin() *Admin {
 		API:api.NewAPI(),
 		router:httprouter.New(),
 		Sessions: make(map[string]*Session),
-		Status:"None",
+		ActionServer:"", Status:"None",
 	}
 	
 	admin.LoadRoutes()
@@ -68,13 +67,13 @@ func (a *Admin) LoadRoutes() {
 	//Waiting
 	a.router.GET("/waiting/:action", a.LoadWaiting)
 	a.router.GET("/error/:action", a.LoadError)
+	a.router.GET("/check", a.CheckStatus)
 }
 
 //Manage Server
 func (a *Admin) Shutdown() {
 	log.Println("Server is shutting down...")
 
-	// timeout could be given instead of nil as a https://golang.org/pkg/context/
 	if err := a.Server.Shutdown(context.Background()); err != nil {
 		log.Println("Admin->Shutdown: ", err)
 	}
