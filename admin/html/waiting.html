@@ -27,10 +27,39 @@
 			 --><div class="Waiting-Side">
 			 		<div class="Waiting-Title">Waiting</div>
 					<div class="Waiting-Message">
-						Please wait for the action to finish.
+						Please wait for the {{.Action}} to finish on the {{.Server}} server.
 					</div>
 				</div>
 			</div>
 		</div>
+		
+		<script>
+			async function checkStatus() {
+				const response = await fetch('/check/{{.Server}}')
+				.then((resp) => resp.text())
+				.then((text) => {parseStatus(text)})
+				.catch((err) => console.error(err.message))	
+			}
+			
+			function parseStatus(status) {
+				switch (status) {
+					case "Shutdown":
+						window.location.replace("/status");
+						break;
+					case "Restarting":
+						setTimeout(checkStatus, 1000)
+						break;
+					case "Running":
+						window.location.replace("/actions");
+						break;
+					default:
+						let split = window.location.pathname.split("/")
+						let actionString = split[split.length - 1]
+						window.location.replace("/error/"+actionString);
+				}
+			}
+			
+			setTimeout(checkStatus, 1000)
+		</script>
 	</body>
 </html>

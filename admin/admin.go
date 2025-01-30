@@ -17,11 +17,18 @@ type Admin struct {
 	router *httprouter.Router
 	Sessions map[string]*Session
 	
-	ActionServer string
 	Status string
 	
+	//Server Actions
 	ApiAction func(string)
 	AuthAction func(string)
+	
+	//Server Statuses
+	ApiStatus func() string
+	AuthStatus func() string
+	
+	//Get PDF Report
+	DownloadReport func() ([]byte, error)
 }
 
 func NewAdmin() *Admin {
@@ -29,7 +36,7 @@ func NewAdmin() *Admin {
 		API:api.NewAPI(),
 		router:httprouter.New(),
 		Sessions: make(map[string]*Session),
-		ActionServer:"", Status:"None",
+		Status:"Init",
 	}
 	
 	admin.LoadRoutes()
@@ -38,6 +45,7 @@ func NewAdmin() *Admin {
 }
 
 func (a *Admin) LaunchServer() {
+	a.Status = "Running"
 	a.router.ServeFiles("/static/*filepath", http.Dir("./admin/html/static"))
 	a.Server = startHTTPServer(a.router)
 }
@@ -67,19 +75,36 @@ func (a *Admin) LoadRoutes() {
 	//Waiting
 	a.router.GET("/waiting/:action", a.LoadWaiting)
 	a.router.GET("/error/:action", a.LoadError)
-	a.router.GET("/check", a.CheckStatus)
+	a.router.GET("/check/:server", a.CheckStatus)
 }
 
 //Manage Server
 func (a *Admin) Shutdown() {
-	log.Println("Server is shutting down...")
-
 	if err := a.Server.Shutdown(context.Background()); err != nil {
 		log.Println("Admin->Shutdown: ", err)
 	}
 }
 
 func (a *Admin) Restart() {
-	a.Shutdown()
-	a.LaunchServer()
+	err := a.Server.Shutdown(context.Background()); 
+	if err != nil {
+		log.Println("Admin->Restart: ", err)
+	} else {
+		a.LaunchServer()
+	}
+}
+
+func (s *Admin) GetStatus() string {
+	return s.Status
+}
+
+//Action
+func (a *Admin) Action(action string) {
+	if action == "Shutdown" {
+		a.Status = "Shutdown"
+		a.Shutdown()
+	} else {
+		a.Status = "Restart"
+		a.Restart()
+	}
 }

@@ -21,6 +21,8 @@ type ApiServer struct {
 	Auth *auth.Auth
 	Routes *api.Routes
 	
+	Status string
+	
 	router *httprouter.Router
 }
 
@@ -30,6 +32,7 @@ func NewApiServer() *ApiServer {
 		API:api.NewAPI(),
 		Auth:auth.NewAuth(),
 		router:httprouter.New(),
+		Status:"Init",
 	}
 	server.Routes = server.API.NewRoutes()
 	server.LoadRoutes()
@@ -39,6 +42,7 @@ func NewApiServer() *ApiServer {
 
 //Manage
 func (s *ApiServer) LaunchServer() {
+	s.Status = "Running"
 	s.Server = startHTTPServer(s.router, "7070")
 }
 
@@ -69,19 +73,32 @@ func (s *ApiServer) LoadRoutes() {
 }
 
 func (s *ApiServer) Shutdown() {
-	log.Println("API Server is shutting down...")
-
 	if err := s.Server.Shutdown(context.Background()); err != nil {
 		log.Println("API->Shutdown: ", err)
 	}
 }
 
+func (s *ApiServer) Restart() {
+	err := s.Server.Shutdown(context.Background()); 
+	if err != nil {
+		log.Println("API->Restart: ", err)
+	} else {
+		s.LaunchServer()
+	}
+}
+
+func (s *ApiServer) GetStatus() string {
+	return s.Status
+}
+
+//Action
 func (s *ApiServer) Action(action string) {
 	if action == "Shutdown" {
+		s.Status = "Shutdown"
 		s.Shutdown()
 	} else {
-		s.Shutdown()
-		s.LaunchServer()
+		s.Status = "Restart"
+		s.Restart()
 	}
 }
 

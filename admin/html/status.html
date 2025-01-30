@@ -29,8 +29,12 @@
 					<div class="Status-Left">
 						<h3 class="Status-Title">API</h3><!--
 						--><div class="Status-Text">-
-							Packet Speed:
-							<span class="Status-Time">{{.ApiTime}}ms</span>
+							{{if .ApiStatus}}
+								<span class="Status-Time">OFFLINE</span>
+							{{else}}
+								Packet Speed:
+								<span class="Status-Time">{{.ApiTime}}ms</span>
+							{{end}}
 						</div>
 					</div>
 					<IMG class="Status-IMG Status-{{.Api}}" src="static/img/{{.Api}}.svg" />
@@ -40,8 +44,12 @@
 					<div class="Status-Left">
 						<h3 class="Status-Title">Auth</h3><!--
 						--><div class="Status-Text">-
-							Packet Speed:
-							<span class="Status-Time">{{.AuthTime}}ms</span>
+							{{if .ApiStatus}}
+								<span class="Status-Time">OFFLINE</span>
+							{{else}}
+								Packet Speed:
+								<span class="Status-Time">{{.AuthTime}}ms</span>
+							{{end}}
 						</div>
 					</div>
 					<IMG class="Status-IMG Status-{{.Auth}}" src="static/img/{{.Auth}}.svg" />
@@ -56,19 +64,7 @@
 						</div>
 					</div>
 					<IMG class="Status-IMG Status-{{.Admin}}" src="static/img/{{.Admin}}.svg" />
-				</div><!--
-				
-				--><div class="Status-Box">
-					<div class="Status-Left">
-						<h3 class="Status-Title">Database</h3><!--
-						--><div class="Status-Text">-
-							Packet Speed:
-							<span class="Status-Time">{{.DBTime}}ms</span>
-						</div>
-					</div>
-					<IMG class="Status-IMG Status-{{.DB}}" src="static/img/{{.DB}}.svg" />
 				</div>
-				
 			</div>
 		</div>
 	</body>

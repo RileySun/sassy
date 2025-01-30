@@ -44,6 +44,16 @@ func (a *API) NewReport() *Report {
 	return report
 }
 
+func (a *API) DownloadReport() ([]byte, error) {
+	report := a.NewReport()
+	
+	bytes, genErr := report.Download()
+	if genErr != nil {
+		return nil, genErr
+	}
+	return bytes, nil
+}
+
 //Main
 func (r *Report) Coallate() {
 	//get User info
@@ -84,6 +94,24 @@ func (r *Report) Generate() {
 		log.Println("Report->Generate->Export: ", exportErr)
 		return
 	}
+}
+
+func (r *Report) Download() ([]byte, error) {
+	createErr := r.CreatePDF()
+	if createErr != nil {
+		log.Println("Report->Generate->Create: ", createErr)
+		return nil, createErr
+	}
+	
+	writeErr := r.WritePDF()
+	if writeErr != nil {
+		log.Println("Report->Generate->Write: ", writeErr)
+		return nil, writeErr
+	}
+	
+	bytes := r.PDF.GetBytesPdf()
+	
+	return bytes, nil
 }
 
 //Coallate

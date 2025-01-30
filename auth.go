@@ -10,27 +10,30 @@ import(
 	"github.com/julienschmidt/httprouter"
 )
 
-
-
 type AuthServer struct {
 	Server *http.Server
 	Auth *auth.Auth
 	
+	Status string //Allows other programs to check if still running
+	
 	router *httprouter.Router
 }
 
+//Create
 func NewAuthServer() *AuthServer {
 	server := &AuthServer{
 		Auth:auth.NewAuth(),
 		router:httprouter.New(),
+		Status:"Init",
 	}
 	server.LoadRoutes()
 	
 	return server
 }
 
-//Launch
+//Management
 func (s *AuthServer) LaunchServer() {
+	s.Status = "Running"
 	s.Server = startHTTPServer(s.router, "8080")
 }
 
@@ -41,19 +44,33 @@ func (s *AuthServer) LoadRoutes() {
 }
 
 func (s *AuthServer) Shutdown() {
-	log.Println("API Server is shutting down...")
-
-	if err := s.Server.Shutdown(context.Background()); err != nil {
+	err := s.Server.Shutdown(context.Background())
+	if err != nil {
 		log.Println("Auth->Shutdown: ", err)
 	}
 }
 
+func (s *AuthServer) Restart() {
+	err := s.Server.Shutdown(context.Background()); 
+	if err != nil {
+		log.Println("Auth->Restart: ", err)
+	} else {
+		s.LaunchServer()
+	}
+}
+
+func (s *AuthServer) GetStatus() string {
+	return s.Status
+}
+
+//Actions
 func (s *AuthServer) Action(actionType string) {
 	if actionType == "Shutdown" {
+		s.Status = "Shutdown"
 		s.Shutdown()
 	} else {
-		s.Shutdown()
-		s.LaunchServer()
+		s.Status = "Restarting"
+		s.Restart()
 	}
 }
 
