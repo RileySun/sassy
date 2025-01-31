@@ -129,6 +129,11 @@
 					</div>
 				</div>
 			</div>
+			
+			<div class="Download" onclick="download()">
+				<IMG class="Download-IMG" src="static/img/Download.svg" /><!--
+			 --><div class="Download-Label">Download</div>
+			</div>
 		</div>
 		
 		<script>
@@ -142,6 +147,26 @@
 				
 				document.getElementById(newTab).style.display = "block";
 			}
+			
+			function download() {
+				const data = base64ToArrayBuffer({{.Report}})
+				const blob = new Blob([data], {type: "application/pdf"});
+				const link = document.createElement('a');
+				link.href = window.URL.createObjectURL(blob);
+				link.download = "Report.pdf";
+				link.click();
+			}
+			
+			function base64ToArrayBuffer(base64) {
+				const binaryString = window.atob(base64);
+				const binaryLen = binaryString.length;
+				let bytes = new Uint8Array(binaryLen);
+				for (let i = 0; i < binaryLen; i++) {
+				   const ascii = binaryString.charCodeAt(i);
+				   bytes[i] = ascii;
+				}
+				return bytes;
+			 }
 		</script>
 	</body>
 </html>

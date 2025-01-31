@@ -11,6 +11,7 @@ import(
 	"github.com/julienschmidt/httprouter"
 )
 
+//Create
 type Admin struct {
 	Server *http.Server
 	API *api.API
@@ -44,6 +45,7 @@ func NewAdmin() *Admin {
 	return admin
 }
 
+//Manage
 func (a *Admin) LaunchServer() {
 	a.Status = "Running"
 	a.router.ServeFiles("/static/*filepath", http.Dir("./admin/html/static"))
@@ -108,3 +110,7 @@ func (a *Admin) Action(action string) {
 		a.Restart()
 	}
 }
+
+//Embed
+//go:embed html/*
+var HTMLFiles embed.FS

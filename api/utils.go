@@ -1,9 +1,11 @@
 package api
 
 import(
+	"os"
 	"log"
 	"embed"
-	"encoding/json"
+	
+	"github.com/joho/godotenv"
 )
 
 type Credentials struct {
@@ -17,16 +19,18 @@ type Credentials struct {
 }
 
 //Actions
-func LoadCredentials() *Credentials {
-	jsonData, fileErr := getFile("assets/config.json")
-	if fileErr != nil {
-		log.Fatal(fileErr)
+func LoadCredentials() *Credentials {	
+	envErr := godotenv.Load()
+	if envErr != nil {
+		log.Fatal("Error loading .env file")
 	}
 	
-	var creds *Credentials
-	jsonErr := json.Unmarshal(jsonData, &creds)
-	if jsonErr != nil {
-		log.Fatal(jsonErr)
+	creds := &Credentials{
+		User:os.Getenv("API_DB_USER"),
+		Pass:os.Getenv("API_DB_PASS"),
+		Host:os.Getenv("API_DB_HOST"),
+		Port:os.Getenv("API_DB_PORT"),
+		Database:os.Getenv("API_DB_DATABASE"),
 	}
 	
 	return creds

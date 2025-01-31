@@ -28,7 +28,7 @@ func (d *Database) connect() {
 	//Open connection
 	d.db, err = sql.Open("mysql", uri)
 	if err != nil {
-		log.Fatal(err, " - OPEN")
+		log.Fatal(err, " - API OPEN")
 	}
 	
 	//Must have
@@ -39,14 +39,14 @@ func (d *Database) connect() {
 	//Make sure connection is real
 	err = d.db.Ping()
 	if err != nil {
-		log.Fatal(err, " - PING")
+		log.Fatal(err, " - API PING")
 	}
 }
 
 func (d *Database) query(queryString string, args ...any) *sql.Rows {
 	resp, err := d.db.Query(queryString, args)
 	if err != nil {
-		log.Println(err, " - Query")
+		log.Println(err, " - API Query")
 	}
 	
 	return resp
@@ -55,7 +55,7 @@ func (d *Database) query(queryString string, args ...any) *sql.Rows {
 func (d *Database) queryNoArgs(queryString string) *sql.Rows {
 	resp, err := d.db.Query(queryString)
 	if err != nil {
-		log.Println(err, " - Query")
+		log.Println(err, " - API Query")
 	}
 	
 	return resp

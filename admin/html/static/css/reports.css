@@ -104,3 +104,27 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 	margin: 0 auto;
 	padding: 2% 0;
 }
+
+.Download {
+	display: block;
+	width: 25%;
+	margin: 1% auto 0;
+	padding: 1% 0;
+	background: #1e252e;
+	text-align: center;
+	border-radius: 1.25vw;
+	cursor: pointer;
+}
+.Download-IMG {
+	display: inline-block;
+	width:12%;
+	vertical-align: middle;
+}
+.Download-Label {
+	display: inline-block;
+	margin: 0;
+	color:#E9E9E9;
+	font-size: 2.5vw;
+	font-weight: 200;
+	vertical-align: middle;
+}

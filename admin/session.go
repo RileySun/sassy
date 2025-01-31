@@ -36,6 +36,17 @@ func (s *Session) isExpired() bool {
 	return s.expires.Before(time.Now())
 }
 
+//LoadLogin
+func (a *Admin) LoadLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/login.html")
+	if parseErr != nil {
+		log.Println("Template->LoadPage->Parse: ", parseErr)
+	}
+	
+	//Show Popup
+	tmpl.Execute(w, false)
+}
+
 //CheckLogin
 func (a Admin) CheckSession(r *http.Request) error {
 	c, cookieErr := r.Cookie("session_token")

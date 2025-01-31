@@ -17,6 +17,7 @@ func (a *Admin) LoadReports(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 
+
 	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/reports.html")
 	if parseErr != nil {
 		log.Println("Template->LoadReports->Parse: ", parseErr)
@@ -24,6 +25,10 @@ func (a *Admin) LoadReports(w http.ResponseWriter, r *http.Request, ps httproute
 	
 	//Get Reports Data
 	report := a.API.NewReport()
+	reportBytes, reportErr := report.Download()
+	if reportErr != nil {
+		log.Println("Template->LoadReports->Download")
+	}
 	
 	//Template Data
 	templateData := struct {
@@ -32,12 +37,14 @@ func (a *Admin) LoadReports(w http.ResponseWriter, r *http.Request, ps httproute
 		TopAll, TopGet, TopAdd, TopUpdate, TopDelete *api.User
 		RevTotal, RevGet, RevAdd, RevUpdate, RevDelete float64
 		Chart string
+		Report []byte
 	}{
 		report.Total, report.Get, report.Add, report.Update, report.Delete,
 		report.AvgTotal, report.AvgGet, report.AvgAdd, report.AvgUpdate, report.AvgDelete,
 		report.TopAll, report.TopGet, report.TopAdd, report.TopUpdate, report.TopDelete,
 		report.RevTotal, report.RevGet, report.RevAdd, report.RevUpdate, report.RevDelete,
 		base64.StdEncoding.EncodeToString(report.RevenueChart()),
+		reportBytes,
 	}
 	
 	tmpl.Execute(w, templateData)

@@ -5,4 +5,6 @@
 TODO.txt
 Report.pdf
 *.env
+
 bin/
+.git/
