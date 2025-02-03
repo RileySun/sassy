@@ -75,6 +75,37 @@ func (s *AuthServer) Action(actionType string) {
 }
 
 //Routes
+//Authentication (How do I decouple this without causing another request check...)
+func (s *AuthServer) CheckAuthentication(r *http.Request) (int, error) {
+	Oauth := r.Header["Authorization"]
+	
+	//dont split before u check it exists
+	if len(Oauth) == 0 {
+		return 0, errors.New("Invalid Authorization Header")
+	}
+	split :=  strings.Split(Oauth[0], " ")
+	
+	//Is Auth there?
+	if len(split) == 1 {
+		return 0, errors.New("Invalid Authorization Header")
+	}
+	accessToken := split[1]
+	
+	//Check Auth
+	authErr := s.Auth.CheckToken(accessToken)
+	if authErr != nil {
+		return 0, authErr
+	}
+	
+	//GetUserID
+	userID := s.Auth.GetUserIdFromToken(accessToken)
+	if userID == 0 {
+		return 0, errors.New("Authorization Failed, Please Contact Administrator")
+	}
+	
+	return userID, nil
+} //checks authorization and returns userID
+
 func (s *AuthServer) GenerateAccessToken(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	r.ParseForm()
 	refreshToken := r.PostFormValue("refresh_token")
