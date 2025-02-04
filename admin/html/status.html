@@ -59,8 +59,12 @@
 					<div class="Status-Left">
 						<h3 class="Status-Title">Admin</h3><!--
 						--><div class="Status-Text">-
-							Packet Speed:
-							<span class="Status-Time">{{.AdminTime}}ms</span>
+							{{if .AdminStatus}}
+								<span class="Status-Time">OFFLINE</span>
+							{{else}}
+								Packet Speed:
+								<span class="Status-Time">{{.AdminTime}}ms</span>
+							{{end}}
 						</div>
 					</div>
 					<IMG class="Status-IMG Status-{{.Admin}}" src="static/img/{{.Admin}}.svg" />

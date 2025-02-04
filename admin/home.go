@@ -2,7 +2,6 @@ package admin
 
 import(
 	"log"
-	"embed"
 	"net/http"
 	"html/template"
 	"github.com/julienschmidt/httprouter"
@@ -11,6 +10,7 @@ import(
 func (a *Admin) LoadHome(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
+		a.Redirect = "home"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}

@@ -1,7 +1,6 @@
-package main
+package api
 
 import(
-	"api"
 	"auth"
 	
 	"log"
@@ -17,9 +16,9 @@ import(
 
 type ApiServer struct {
 	Server *http.Server
-	API *api.API
+	API *API
 	Auth *auth.Auth
-	Routes *api.Routes
+	Routes *Routes
 	
 	Status string
 	
@@ -29,7 +28,7 @@ type ApiServer struct {
 //Create
 func NewApiServer() *ApiServer {
 	server := &ApiServer{
-		API:api.NewAPI(),
+		API:NewAPI(),
 		Auth:auth.NewAuth(),
 		router:httprouter.New(),
 		Status:"Init",
@@ -65,11 +64,11 @@ func (s *ApiServer) LoadRoutes() {
 	s.router.POST("/videos/update", s.UpdateVideo)
 	s.router.GET("/videos/delete/:videoID", s.DeleteVideo)
 	
+	//Status
+	s.router.GET("/status", s.CheckStatus)
+	
 	//Error
 	s.router.GET("/", Error404)
-
-	//Launch
-	
 }
 
 func (s *ApiServer) Shutdown() {
@@ -420,3 +419,8 @@ func (s *ApiServer) DeleteVideo(w http.ResponseWriter, r *http.Request, ps httpr
 		log.Println(writeErr)
 	}
 } //API/Video/Delete GET?
+
+//Server Status
+func (s *ApiServer) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Write([]byte(s.GetStatus()))
+}

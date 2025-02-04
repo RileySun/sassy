@@ -1,26 +1,26 @@
 package main
 
 import(
-	
+	"api"
+	"auth"
+	"admin"
 )
 
 func main() {
-	apiServer := NewApiServer()
-	authServer := NewAuthServer()
-	adminServer := NewAdminServer()
+	apiServer := api.NewApiServer()
+	authServer := auth.NewAuthServer()
+	adminServer := admin.NewAdmin()
 	
-	//Must interconnect these before launch
-	adminServer.Admin.ApiAction = apiServer.Action
-	adminServer.Admin.AuthAction = authServer.Action
-	adminServer.Admin.ApiStatus = apiServer.GetStatus
-	adminServer.Admin.AuthStatus = authServer.GetStatus
-	adminServer.Admin.DownloadReport = apiServer.API.DownloadReport
-
+	//Must interconnect these before launch (working to remove these)
+	adminServer.ApiAction = apiServer.Action
+	adminServer.AuthAction = authServer.Action
+	adminServer.DownloadReport = apiServer.API.DownloadReport
+	
 	apiServer.LaunchServer()
 	authServer.LaunchServer()
 	adminServer.LaunchServer()
 	
-	for true {
-		
-    }
+	for {
+	
+	}
 }

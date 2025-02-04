@@ -11,6 +11,7 @@ import(
 func (a *Admin) LoadWaiting(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
+		a.Redirect = "waiting"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}
@@ -66,6 +67,7 @@ func (a *Admin) LoadWaiting(w http.ResponseWriter, r *http.Request, ps httproute
 func (a *Admin) LoadError(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
+		a.Redirect = "home"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}
@@ -97,20 +99,12 @@ func (a *Admin) LoadError(w http.ResponseWriter, r *http.Request, ps httprouter.
 	tmpl.Execute(w, templateData)
 }
 
-func (a *Admin) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	serverCheck := ps.ByName("server")
+func (a *Admin) GetServerStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	server := ps.ByName("server")
 	
-	var response string
-	switch serverCheck {
-		case "API":
-			response = a.ApiStatus()
-		case "Auth":
-			response = a.ApiStatus()
-		case "Admin":
-			response = a.GetStatus()
-	}
+	status, _ := a.CheckServerStatus(server)
 
-	_, writeErr := w.Write([]byte(response))
+	_, writeErr := w.Write([]byte(status))
 	if writeErr != nil {
 		log.Println(writeErr)
 	}

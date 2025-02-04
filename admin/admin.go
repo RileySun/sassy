@@ -3,13 +3,17 @@ package admin
 import(
 	"api"
 	
+	"io"
 	"log"
-	//"time"
+	"time"
+	"embed"
 	"context"
 	"net/http"
 	
 	"github.com/julienschmidt/httprouter"
 )
+
+const API_PORT, AUTH_PORT, ADMIN_PORT = "7070", "8080", "9090"
 
 //Create
 type Admin struct {
@@ -19,14 +23,10 @@ type Admin struct {
 	Sessions map[string]*Session
 	
 	Status string
+	Redirect string //if redirected to login, go elsewhere after
 	
 	//Server Actions
-	ApiAction func(string)
-	AuthAction func(string)
-	
-	//Server Statuses
-	ApiStatus func() string
-	AuthStatus func() string
+	ApiAction, AuthAction func(string)
 	
 	//Get PDF Report
 	DownloadReport func() ([]byte, error)
@@ -77,7 +77,10 @@ func (a *Admin) LoadRoutes() {
 	//Waiting
 	a.router.GET("/waiting/:action", a.LoadWaiting)
 	a.router.GET("/error/:action", a.LoadError)
-	a.router.GET("/check/:server", a.CheckStatus)
+	a.router.GET("/check/:server", a.GetServerStatus) //Waiting page tick for redirect 
+	
+	//Status
+	a.router.GET("/checkstatus", a.CheckStatus)
 }
 
 //Manage Server
@@ -109,6 +112,46 @@ func (a *Admin) Action(action string) {
 		a.Status = "Restart"
 		a.Restart()
 	}
+}
+
+func (a *Admin) CheckServerStatus(server string) (string, int) {
+	start := time.Now()
+	
+	var url = "http://localhost:"
+	switch server {
+		case "API":
+			url += API_PORT + "/status"
+		case "Auth":
+			url += AUTH_PORT + "/status"
+		case "Admin":
+			url += ADMIN_PORT + "/checkstatus"
+		default:
+			return "Error - " + server, -1
+	}
+	
+	resp, getErr := http.Get(url)
+	if getErr != nil {
+		//this means server offline, no need to log it
+		//log.Println("Admin->CheckStatus->"+server+"->Get: ", getErr)
+		return "Shutdown", -1
+	}
+	
+	body, bodyErr := io.ReadAll(resp.Body)
+	if bodyErr != nil {
+		log.Println("Admin->CheckStatus->"+server+"->Body: ", bodyErr)
+	}
+	
+	timing := time.Since(start).Milliseconds()
+	if timing < 1 {
+		timing = 1
+	}
+	
+	return string(body), int(timing)
+}
+
+//Routes
+func (a *Admin) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Write([]byte(a.GetStatus()))
 }
 
 //Embed

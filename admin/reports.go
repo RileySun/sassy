@@ -13,6 +13,7 @@ import(
 func (a *Admin) LoadReports(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
+		a.Redirect = "reports"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}

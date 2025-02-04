@@ -11,6 +11,7 @@ import(
 func (a *Admin) LoadActions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
+		a.Redirect = "actions"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}

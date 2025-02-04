@@ -1,9 +1,9 @@
-package main
+package auth
 
 import(
-	"auth"
-	
 	"log"
+	"errors"
+	"strings"
 	"context"
 	"net/http"
 	
@@ -12,9 +12,9 @@ import(
 
 type AuthServer struct {
 	Server *http.Server
-	Auth *auth.Auth
+	Auth *Auth
 	
-	Status string //Allows other programs to check if still running
+	Status string
 	
 	router *httprouter.Router
 }
@@ -22,7 +22,7 @@ type AuthServer struct {
 //Create
 func NewAuthServer() *AuthServer {
 	server := &AuthServer{
-		Auth:auth.NewAuth(),
+		Auth:NewAuth(),
 		router:httprouter.New(),
 		Status:"Init",
 	}
@@ -41,6 +41,7 @@ func (s *AuthServer) LoadRoutes() {
 	//Auth
 	s.router.POST("/token/generate", s.GenerateAccessToken)
 	
+	s.router.GET("/status", s.CheckStatus)
 }
 
 func (s *AuthServer) Shutdown() {
@@ -119,4 +120,8 @@ func (s *AuthServer) GenerateAccessToken(w http.ResponseWriter, r *http.Request,
 		w.Write([]byte(tokenErr.Error()))
 	}
 	w.Write([]byte(accessToken))
+}
+
+func (s *AuthServer) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Write([]byte(s.GetStatus()))
 }

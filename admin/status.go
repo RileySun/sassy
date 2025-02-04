@@ -13,6 +13,7 @@ const SPEED_MAX = 150
 func (a *Admin) LoadStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
+		a.Redirect = "status"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}
@@ -26,22 +27,32 @@ func (a *Admin) LoadStatus(w http.ResponseWriter, r *http.Request, ps httprouter
 	var apiImage, authImage, adminImage string
 	
 	//Get status
-	var apiStatus, authStatus string
-	if a.ApiStatus() != "Running" {
-		apiStatus = "OFFLINE"
+	apiStatus, apiSpeed := a.CheckServerStatus("API")
+	authStatus, authSpeed := a.CheckServerStatus("Auth")
+	adminStatus, adminSpeed := a.CheckServerStatus("Admin")
+	
+	//Text & Images
+	var apiText, authText, adminText string
+	if apiStatus != "Running" {
+		apiText = "OFFLINE"
 		apiImage = "Error"
 	} else {
 		apiImage = "OK"
 	}
-	if a.AuthStatus() != "Running" {
-		authStatus = "OFFLINE"
+	if authStatus != "Running" {
+		authText = "OFFLINE"
 		authImage = "Error"
 	} else {
 		authImage = "OK"
 	}
+	if adminStatus != "Running" {
+		adminText = "OFFLINE"
+		adminImage = "Error"
+	} else {
+		adminImage = "OK"
+	}
 	
-	//Get Speed
-	var apiSpeed, authSpeed, adminSpeed int = 56, 100, 300
+	//Speed
 	if apiSpeed > SPEED_MAX {
 		apiImage = "Slow"
 	}
@@ -57,11 +68,11 @@ func (a *Admin) LoadStatus(w http.ResponseWriter, r *http.Request, ps httprouter
 	templateData := struct {
     	Api, Auth, Admin, DB string
     	ApiTime, AuthTime, AdminTime, DBTime int
-    	ApiStatus, AuthStatus string
+    	ApiStatus, AuthStatus, AdminStatus string
 	}{
 		Api:apiImage, Auth:authImage, Admin:adminImage,
 		ApiTime:apiSpeed, AuthTime:authSpeed, AdminTime:adminSpeed,
-		ApiStatus:apiStatus, AuthStatus:authStatus,
+		ApiStatus:apiText, AuthStatus:authText, AdminStatus:adminText,
 	}
 	
 	tmpl.Execute(w, templateData)

@@ -76,7 +76,9 @@ func (a *Admin) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 	//Fake it for now, we gonna hook an auth db to this
 	if user == "janeD" && pass == "prW4nj7KL" {
 		a.NewSession(w, user)
-		http.Redirect(w, r, "/", http.StatusFound)		
+		
+		http.Redirect(w, r, "/" + a.Redirect, http.StatusFound)		
+		a.Redirect = ""
 	} else {
 		//Reload Login Page
 		tmpl, parseErr := template.ParseFS(HTMLFiles, "html/login.html")
