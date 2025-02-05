@@ -67,6 +67,9 @@ func (s *ApiServer) LoadRoutes() {
 	//Status
 	s.router.GET("/status", s.CheckStatus)
 	
+	//Action
+	s.router.POST("/action/:type", s.Action)
+	
 	//Error
 	s.router.GET("/", Error404)
 }
@@ -91,7 +94,13 @@ func (s *ApiServer) GetStatus() string {
 }
 
 //Action
-func (s *ApiServer) Action(action string) {
+func (s *ApiServer) Action(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	_, writeErr := w.Write([]byte("OK"))
+	if writeErr != nil {
+		log.Println(writeErr)
+	}
+	
+	action := ps.ByName("type")
 	if action == "Shutdown" {
 		s.Status = "Shutdown"
 		s.Shutdown()

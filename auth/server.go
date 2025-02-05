@@ -41,7 +41,11 @@ func (s *AuthServer) LoadRoutes() {
 	//Auth
 	s.router.POST("/token/generate", s.GenerateAccessToken)
 	
+	//Status
 	s.router.GET("/status", s.CheckStatus)
+	
+	//Action
+	s.router.POST("/action/:type", s.Action)
 }
 
 func (s *AuthServer) Shutdown() {
@@ -65,13 +69,19 @@ func (s *AuthServer) GetStatus() string {
 }
 
 //Actions
-func (s *AuthServer) Action(actionType string) {
-	if actionType == "Shutdown" {
+func (s *AuthServer) Action(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	action := ps.ByName("action")
+	if action == "Shutdown" {
 		s.Status = "Shutdown"
 		s.Shutdown()
 	} else {
-		s.Status = "Restarting"
+		s.Status = "Restart"
 		s.Restart()
+	}
+	
+	_, writeErr := w.Write([]byte("OK"))
+	if writeErr != nil {
+		log.Println(writeErr)
 	}
 }
 

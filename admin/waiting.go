@@ -26,7 +26,7 @@ func (a *Admin) LoadWaiting(w http.ResponseWriter, r *http.Request, ps httproute
 	splits := strings.Split(actionString, "_")
 	var server, action string
 	if len(splits) < 2 {
-		log.Println("Template->LoadError->ActionString: Action Parse Error", actionString, splits)
+		log.Println("Template->LoadWaiting->ActionString: Action Parse Error", actionString, splits)
 		server, action = "Error", "Error"
 		http.Redirect(w, r, "/", http.StatusFound)	
 	} else {
@@ -42,25 +42,17 @@ func (a *Admin) LoadWaiting(w http.ResponseWriter, r *http.Request, ps httproute
 	
 	tmpl.Execute(w, templateData)
 	
-	switch server {
-		case "API":
-			if action == "Shutdown" {
-				a.ApiAction("Shutdown")
-			} else {
-				a.ApiAction("Restart")
-			}	
-		case "Auth":
-			if action == "Shutdown" {
-				a.AuthAction("Shutdown")
-			} else {
-				a.AuthAction("Restart")
-			}
-		case "Admin":
-			if action == "Shutdown" {
-				a.Status = "Down"
-			} else {
-				a.Status = "Restarting"
-			}
+	if server != "Admin" {
+		actionErr := a.ServerAction(server, action)
+		if actionErr != nil {
+			log.Println("Admin->LoadWaiting->ServerAction: ", actionErr)
+		}
+	} else {
+		if action == "Shutdown" {
+			a.Status = "Down"
+		} else {
+			a.Status = "Restarting"
+		}
 	}
 }
 

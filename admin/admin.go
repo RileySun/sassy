@@ -149,6 +149,30 @@ func (a *Admin) CheckServerStatus(server string) (string, int) {
 	return string(body), int(timing)
 }
 
+func (a *Admin) ServerAction(server string, action string) error {
+	var url = "http://localhost:"
+	switch server {
+		case "API":
+			url += API_PORT + "/action/" + action
+		case "Auth":
+			url += AUTH_PORT + "/action/" + action			
+	}
+	
+	resp, postErr := http.Post(url, "text/plain", nil)
+	if postErr != nil {
+		log.Println("Admin->ServerAction->"+server+"->Get: ", postErr)
+		return postErr
+	}
+	
+	_, bodyErr := io.ReadAll(resp.Body)
+	if bodyErr != nil {
+		log.Println("Admin->CheckStatus->"+server+"->Body: ", bodyErr)
+		return bodyErr
+	}
+	
+	return nil
+}
+
 //Routes
 func (a *Admin) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Write([]byte(a.GetStatus()))

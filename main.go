@@ -12,8 +12,6 @@ func main() {
 	adminServer := admin.NewAdmin()
 	
 	//Must interconnect these before launch (working to remove these)
-	adminServer.ApiAction = apiServer.Action
-	adminServer.AuthAction = authServer.Action
 	adminServer.DownloadReport = apiServer.API.DownloadReport
 	
 	apiServer.LaunchServer()
