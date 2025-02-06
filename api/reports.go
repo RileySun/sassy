@@ -239,19 +239,36 @@ func (r *Report) CreatePDF() error {
 
 func (r *Report) WritePDF() error {
 	//Logo
-	//pdf.Image("../imgs/gopher.jpg", 200, 50, nil)
+	logo := imageFromBytes(logoBytes)
+	r.PDF.ImageFromWithOption(logo, gopdf.ImageFromOption{
+		Format: "png",
+		X:      0,
+		Y:     	0,
+		Rect:   nil,
+	})
 	
 	//Header
 	_ = r.PDF.SetFontSize(38)
-	r.PDF.SetXY(220, 10)
+	r.PDF.SetXY(215, 10)
 	r.PDF.Cell(nil, "API Report")
 	
 	//Date
 	t := time.Now()
 	dateString := t.Format("2006-01-02")
 	_ = r.PDF.SetFontSize(16)
-	r.PDF.SetXY(260, 50)
+	r.PDF.SetXY(260, 55)
 	r.PDF.Cell(nil, dateString)
+	
+	//Explanation
+	_ = r.PDF.SetFontSize(16)
+	r.PDF.SetXY(200, 80)
+	r.PDF.Cell(nil, "Monthly Report of API Usage")
+	
+	//Draw Line
+	r.PDF.SetLineWidth(2)
+	r.PDF.SetLineType("dashed")
+	r.PDF.Line(50, 112, 545, 112)
+	r.PDF.SetLineType("solid")
 	
 	//Total Usage
 	_ = r.PDF.SetFontSize(22)

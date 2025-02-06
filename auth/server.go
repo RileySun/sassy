@@ -2,6 +2,7 @@ package auth
 
 import(
 	"log"
+	"time"
 	"errors"
 	"strings"
 	"context"
@@ -49,7 +50,9 @@ func (s *AuthServer) LoadRoutes() {
 }
 
 func (s *AuthServer) Shutdown() {
-	err := s.Server.Shutdown(context.Background())
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 1*time.Second)
+	defer shutdownRelease()
+	err := s.Server.Shutdown(shutdownCtx)
 	if err != nil {
 		log.Println("Auth->Shutdown: ", err)
 	}
@@ -70,18 +73,18 @@ func (s *AuthServer) GetStatus() string {
 
 //Actions
 func (s *AuthServer) Action(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	action := ps.ByName("action")
+	_, writeErr := w.Write([]byte("OK"))
+	if writeErr != nil {
+		log.Println(writeErr)
+	}
+	
+	action := ps.ByName("type")
 	if action == "Shutdown" {
 		s.Status = "Shutdown"
 		s.Shutdown()
 	} else {
 		s.Status = "Restart"
 		s.Restart()
-	}
-	
-	_, writeErr := w.Write([]byte("OK"))
-	if writeErr != nil {
-		log.Println(writeErr)
 	}
 }
 

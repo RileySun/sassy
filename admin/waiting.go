@@ -11,7 +11,7 @@ import(
 func (a *Admin) LoadWaiting(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
-		a.Redirect = "waiting"
+		a.Redirect = "actions"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}
@@ -59,7 +59,7 @@ func (a *Admin) LoadWaiting(w http.ResponseWriter, r *http.Request, ps httproute
 func (a *Admin) LoadError(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authErr := a.CheckSession(r)
 	if authErr != nil {
-		a.Redirect = "home"
+		a.Redirect = "actions"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}

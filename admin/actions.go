@@ -8,19 +8,39 @@ import(
 )
 
 func (a *Admin) LoadActions(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//Check Auth
 	authErr := a.CheckSession(r)
 	if authErr != nil {
 		a.Redirect = "actions"
 		http.Redirect(w, r, "/login", http.StatusFound)	
 		return
 	}
-
+	
+	//Get Template
 	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/actions.html")
 	if parseErr != nil {
 		log.Println("Template->LoadActions->Parse: ", parseErr)
 	}
 	
-	tmpl.Execute(w, nil)
+	//Server Status
+	var apiStatus, authStatus string
+	rawAPI, _ := a.CheckServerStatus("API")
+	rawAuth, _ := a.CheckServerStatus("Auth")
+	if rawAPI != "Running" {
+		apiStatus = rawAPI
+	}
+	if rawAuth != "Running" {
+		authStatus = rawAuth
+	}
+	
+	//Template Data
+	templateData := struct {
+    	API, Auth string
+	}{
+		apiStatus, authStatus,
+	}
+	
+	tmpl.Execute(w, templateData)
 }
 
 func (a *Admin) DoAction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

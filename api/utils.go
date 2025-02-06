@@ -47,7 +47,7 @@ func startHTTPServer(r http.Handler, port string) *http.Server {
 	}
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			// cannot panic, because this probably is an intentional close
 			//log.Printf("Httpserver: ListenAndServe() error: %s", err)
 		} else {
@@ -70,3 +70,6 @@ func getFile(path string) ([]byte, error) {
 	}
 	return fileByte, nil
 }
+
+//go:embed Logo.png
+var logoBytes []byte

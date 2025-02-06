@@ -84,8 +84,11 @@ func (a *Admin) LoadRoutes() {
 }
 
 //Manage Server
-func (a *Admin) Shutdown() {
-	if err := a.Server.Shutdown(context.Background()); err != nil {
+func (a *Admin) Shutdown() {	
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 1*time.Second)
+	defer shutdownRelease()
+	err := a.Server.Shutdown(shutdownCtx)
+	if err != nil {
 		log.Println("Admin->Shutdown: ", err)
 	}
 }
@@ -158,16 +161,10 @@ func (a *Admin) ServerAction(server string, action string) error {
 			url += AUTH_PORT + "/action/" + action			
 	}
 	
-	resp, postErr := http.Post(url, "text/plain", nil)
+	_, postErr := http.Post(url, "text/plain", nil)
 	if postErr != nil {
 		log.Println("Admin->ServerAction->"+server+"->Get: ", postErr)
 		return postErr
-	}
-	
-	_, bodyErr := io.ReadAll(resp.Body)
-	if bodyErr != nil {
-		log.Println("Admin->CheckStatus->"+server+"->Body: ", bodyErr)
-		return bodyErr
 	}
 	
 	return nil

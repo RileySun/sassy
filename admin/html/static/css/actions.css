@@ -37,12 +37,14 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 	margin: 2% auto;
 	padding: 1% 0;
 	background: #1e252e;
+	color: #1e252e;
 	border 2px solid #1d2d3a;
 	border-radius: 1.5vw;
-	transition: background 0.5s ease-in;
+	transition: background 0.5s ease-in, color 0.5s ease-in;
 }
 .Actions-Box:hover {
 	background: #1d2d3a;
+	color: #1d2d3a;
 }
 .Actions-Label {
 	display: inline-block;
@@ -77,4 +79,8 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 .Actions-Button:hover {
 	color: #E9E9E9;
 	background: #1e252e;
+}
+.Actions-Button:disabled {
+	background: inherit !important;
+	color: inherit !important;
 }

@@ -30,12 +30,12 @@
 					<form class="Actions-Form" method="POST">
 						<input type="hidden" name="Action"value="Restart" />
 						<input type="hidden" name="Server" value="API" />
-						<input type="submit" class="Actions-Button" value="Restart" />
+						<input type="submit" class="Actions-Button" {{if .API}} disabled {{end}} value="Restart" />
 					</form>
 					<form class="Actions-Form" method="POST">
 						<input type="hidden" name="Action"value="Shutdown" />
 						<input type="hidden" name="Server" value="API" />
-						<input type="submit" class="Actions-Button" value="Shutdown" />
+						<input type="submit" class="Actions-Button" {{if .API}} disabled {{end}} value="Shutdown" />
 					</form>
 				</div><!--
 			 --><div class="Actions-Box">
@@ -43,12 +43,12 @@
 					<form class="Actions-Form" method="POST">
 						<input type="hidden" name="Action"value="Restart" />
 						<input type="hidden" name="Server" value="Auth" />
-						<input type="submit" class="Actions-Button" value="Restart" />
+						<input type="submit" class="Actions-Button" {{if .Auth}} disabled {{end}} value="Restart" />
 					</form>
 					<form class="Actions-Form" method="POST">
 						<input type="hidden" name="Action"value="Shutdown" />
 						<input type="hidden" name="Server" value="Auth" />
-						<input type="submit" class="Actions-Button" value="Shutdown" />
+						<input type="submit" class="Actions-Button" {{if .Auth}} disabled {{end}} value="Shutdown" />
 					</form>
 				</div><!--
 			 --><div class="Actions-Box">
@@ -66,5 +66,9 @@
 				</div>
 			</div>
 		</div>
+		
+		<script>
+			console.log({{.API}}, {{.Auth}})
+		</script>
 	</body>
 </html>

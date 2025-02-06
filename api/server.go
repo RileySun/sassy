@@ -5,6 +5,7 @@ import(
 	
 	"log"
 	"fmt"
+	"time"
 	"errors"
 	"context"
 	"strconv"
@@ -75,7 +76,10 @@ func (s *ApiServer) LoadRoutes() {
 }
 
 func (s *ApiServer) Shutdown() {
-	if err := s.Server.Shutdown(context.Background()); err != nil {
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 1*time.Second)
+	defer shutdownRelease()
+	err := s.Server.Shutdown(shutdownCtx)
+	if err != nil {
 		log.Println("API->Shutdown: ", err)
 	}
 }
