@@ -38,6 +38,20 @@ func LoadCredentials() *Credentials {
 	return creds
 }
 
+func GetServerURL(server string) string {
+	var url string
+	switch server {
+		case "API":
+			url = os.Getenv("API_URL")
+		case "Auth":
+			url = os.Getenv("AUTH_URL")
+		case "Admin":
+			url = os.Getenv("ADMIN_URL")
+	}
+	return url
+}
+
+//Server Start
 func startHTTPServer(r http.Handler, port string) *http.Server {
 	srv := &http.Server{
 		Handler: r,

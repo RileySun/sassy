@@ -1,15 +1,13 @@
 package api
 
 import(
-	"auth"
-	
+	"io"
 	"log"
 	"fmt"
 	"time"
 	"errors"
 	"context"
 	"strconv"
-	"strings"
 	"net/http"
 	
 	"github.com/julienschmidt/httprouter"
@@ -18,7 +16,7 @@ import(
 type ApiServer struct {
 	Server *http.Server
 	API *API
-	Auth *auth.Auth
+	
 	Routes *Routes
 	
 	Status string
@@ -30,7 +28,7 @@ type ApiServer struct {
 func NewApiServer() *ApiServer {
 	server := &ApiServer{
 		API:NewAPI(),
-		Auth:auth.NewAuth(),
+		
 		router:httprouter.New(),
 		Status:"Init",
 	}
@@ -73,6 +71,9 @@ func (s *ApiServer) LoadRoutes() {
 	
 	//Error
 	s.router.GET("/", Error404)
+	
+	//Download Report
+	s.router.GET("/report/download", s.DownloadReport)
 }
 
 func (s *ApiServer) Shutdown() {
@@ -121,30 +122,39 @@ func Error404(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 //Authentication (How do I decouple this without causing another request check...)
 func (s *ApiServer) CheckAuthentication(r *http.Request) (int, error) {
-	Oauth := r.Header["Authorization"]
-	
-	//dont split before u check it exists
-	if len(Oauth) == 0 {
-		return 0, errors.New("Invalid Authorization Header")
+	//Create Request
+	client := &http.Client{}
+	url := GetServerURL("Auth") + "/check"
+	req, reqErr := http.NewRequest("GET", url, nil)
+	if reqErr != nil {
+		log.Println("API->CheckAuthentication->Req: ", reqErr)
+		return -1, reqErr
 	}
-	split :=  strings.Split(Oauth[0], " ")
+	req.Header = r.Header
 	
-	//Is Auth there?
-	if len(split) == 1 {
-		return 0, errors.New("Invalid Authorization Header")
-	}
-	accessToken := split[1]
-	
-	//Check Auth
-	authErr := s.Auth.CheckToken(accessToken)
-	if authErr != nil {
-		return 0, authErr
+	//Do Request
+	resp, getErr := client.Do(req)
+	if getErr != nil {
+		log.Println("API->CheckAuthentication->Get: ", getErr)
+		return -1, getErr
 	}
 	
-	//GetUserID
-	userID := s.Auth.GetUserIdFromToken(accessToken)
-	if userID == 0 {
-		return 0, errors.New("Authorization Failed, Please Contact Administrator")
+	//Read Body
+	body, bodyErr := io.ReadAll(resp.Body)
+	if bodyErr != nil {
+		log.Println("API->CheckAuthentication->Body: ", bodyErr)
+		return -1, bodyErr
+	}
+	
+	//Parse User ID
+	userID, parseErr := strconv.Atoi(string(body[:]))
+	if parseErr != nil {
+		log.Println("API->CheckAuthentication->Parse", parseErr)
+		return -1, parseErr
+	}
+	
+	if userID < 1 {
+		return -1, errors.New("Invalid of Expired Access Token")
 	}
 	
 	return userID, nil
@@ -435,5 +445,22 @@ func (s *ApiServer) DeleteVideo(w http.ResponseWriter, r *http.Request, ps httpr
 
 //Server Status
 func (s *ApiServer) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Write([]byte(s.GetStatus()))
+	_, writeErr := w.Write([]byte(s.GetStatus()))
+	if writeErr != nil {
+		log.Println(writeErr)
+	}
+}
+
+//Download Report
+func (s *ApiServer) DownloadReport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	report := s.API.NewReport()
+	reportBytes, reportErr := report.Download()
+	if reportErr != nil {
+		log.Println("API->Server->DownloadReport", reportErr)
+	}
+	
+	_, writeErr := w.Write(reportBytes)
+	if writeErr != nil {
+		log.Println(writeErr)
+	}
 }

@@ -1,9 +1,23 @@
 package admin
 
 import (
+	"os"
 	"log"
 	"net/http"
 )
+
+func GetServerURL(server string) string {
+	var url string
+	switch server {
+		case "API":
+			url = os.Getenv("API_URL")
+		case "Auth":
+			url = os.Getenv("AUTH_URL")
+		case "Admin":
+			url = os.Getenv("ADMIN_URL")
+	}
+	return url
+}
 
 func startHTTPServer(r http.Handler) *http.Server {
 	srv := &http.Server{

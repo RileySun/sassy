@@ -27,9 +27,6 @@ type Admin struct {
 	
 	//Server Actions
 	ApiAction, AuthAction func(string)
-	
-	//Get PDF Report
-	DownloadReport func() ([]byte, error)
 }
 
 func NewAdmin() *Admin {
@@ -120,16 +117,11 @@ func (a *Admin) Action(action string) {
 func (a *Admin) CheckServerStatus(server string) (string, int) {
 	start := time.Now()
 	
-	var url = "http://localhost:"
-	switch server {
-		case "API":
-			url += API_PORT + "/status"
-		case "Auth":
-			url += AUTH_PORT + "/status"
-		case "Admin":
-			url += ADMIN_PORT + "/checkstatus"
-		default:
-			return "Error - " + server, -1
+	var url = GetServerURL(server)
+	if server == "Admin" {
+		url += "/checkstatus"
+	} else {
+		url += "/status"
 	}
 	
 	resp, getErr := http.Get(url)
@@ -153,13 +145,7 @@ func (a *Admin) CheckServerStatus(server string) (string, int) {
 }
 
 func (a *Admin) ServerAction(server string, action string) error {
-	var url = "http://localhost:"
-	switch server {
-		case "API":
-			url += API_PORT + "/action/" + action
-		case "Auth":
-			url += AUTH_PORT + "/action/" + action			
-	}
+	var url = GetServerURL(server) + "/action"
 	
 	_, postErr := http.Post(url, "text/plain", nil)
 	if postErr != nil {

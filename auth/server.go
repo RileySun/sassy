@@ -5,6 +5,7 @@ import(
 	"time"
 	"errors"
 	"strings"
+	"strconv"
 	"context"
 	"net/http"
 	
@@ -40,6 +41,7 @@ func (s *AuthServer) LaunchServer() {
 
 func (s *AuthServer) LoadRoutes() {
 	//Auth
+	s.router.GET("/check", s.CheckAuthentication)
 	s.router.POST("/token/generate", s.GenerateAccessToken)
 	
 	//Status
@@ -90,34 +92,42 @@ func (s *AuthServer) Action(w http.ResponseWriter, r *http.Request, ps httproute
 
 //Routes
 //Authentication (How do I decouple this without causing another request check...)
-func (s *AuthServer) CheckAuthentication(r *http.Request) (int, error) {
+func (s *AuthServer) CheckAuthentication(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	Oauth := r.Header["Authorization"]
 	
 	//dont split before u check it exists
 	if len(Oauth) == 0 {
-		return 0, errors.New("Invalid Authorization Header")
+		log.Println("Auth->Server->CheckAuthentication->Oauth", errors.New("Invalid Authorization Header"))
 	}
 	split :=  strings.Split(Oauth[0], " ")
 	
 	//Is Auth there?
 	if len(split) == 1 {
-		return 0, errors.New("Invalid Authorization Header")
+		log.Println("Auth->Server->CheckAuthentication->Split", errors.New("Invalid Authorization Header"))
 	}
 	accessToken := split[1]
 	
 	//Check Auth
 	authErr := s.Auth.CheckToken(accessToken)
 	if authErr != nil {
-		return 0, authErr
+		//We dont need to log everytime some fails a token check
+		//log.Println("Auth->Server->CheckAuthentication->CheckToken", authErr)
+		w.Write([]byte("-2"))
+		return
 	}
 	
 	//GetUserID
 	userID := s.Auth.GetUserIdFromToken(accessToken)
 	if userID == 0 {
-		return 0, errors.New("Authorization Failed, Please Contact Administrator")
+		userID = -1
+		log.Println("Auth->Server->CheckAuthentication->GetUserIdFromToken", errors.New("Authorization Failed, Please Contact Administrator"))
 	}
 	
-	return userID, nil
+	_, writeErr := w.Write([]byte(strconv.Itoa(userID)))
+	if writeErr != nil {
+		log.Println("Auth->Server->CheckAuthentication->Write", writeErr)
+	}
+	
 } //checks authorization and returns userID
 
 func (s *AuthServer) GenerateAccessToken(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -136,5 +146,8 @@ func (s *AuthServer) GenerateAccessToken(w http.ResponseWriter, r *http.Request,
 }
 
 func (s *AuthServer) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Write([]byte(s.GetStatus()))
+	_, writeErr := w.Write([]byte(s.GetStatus()))
+	if writeErr != nil {
+		log.Println("Auth->Server->CheckStatus->Write", writeErr)
+	}
 }

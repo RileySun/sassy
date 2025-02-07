@@ -1,6 +1,7 @@
 package admin
 
-import(	
+import(
+	"io"
 	"log"
 	"api"
 	"net/http"
@@ -26,10 +27,13 @@ func (a *Admin) LoadReports(w http.ResponseWriter, r *http.Request, ps httproute
 	
 	//Get Reports Data
 	report := a.API.NewReport()
+	/*
 	reportBytes, reportErr := report.Download()
 	if reportErr != nil {
 		log.Println("Template->LoadReports->Download")
 	}
+	*/
+	reportBytes := a.DownloadReport()
 	
 	//Template Data
 	templateData := struct {
@@ -49,4 +53,18 @@ func (a *Admin) LoadReports(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 	
 	tmpl.Execute(w, templateData)
+}
+
+func (a *Admin) DownloadReport() ([]byte) {
+	resp, getErr := http.Get("http://localhost:"+API_PORT+"/report/download")
+	if getErr != nil {
+		log.Println("Admin->DownloadReport->POST:", getErr)
+	}
+	
+	body, bodyErr := io.ReadAll(resp.Body)
+	if bodyErr != nil {
+		log.Println("Admin->DownloadReport->->Body:", bodyErr)
+	}
+	
+	return body
 }
