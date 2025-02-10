@@ -4,7 +4,7 @@ import(
 	"os"
 	"log"
 	"time"
-	"embed"
+	_ "embed"
 	"net/http"
 	
 	"github.com/joho/godotenv"
@@ -24,7 +24,8 @@ type Credentials struct {
 func LoadCredentials() *Credentials {	
 	envErr := godotenv.Load()
 	if envErr != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("API: Error loading .env file - ", envErr)
+		log.Println("This may be caused by running in docker")
 	}
 	
 	creds := &Credentials{
@@ -73,6 +74,10 @@ func startHTTPServer(r http.Handler, port string) *http.Server {
 	return srv
 }
 
+//go:embed Logo.png
+var logoBytes []byte
+
+/*
 //Files
 //go:embed assets
 var AssetsFolder embed.FS
@@ -84,6 +89,4 @@ func getFile(path string) ([]byte, error) {
 	}
 	return fileByte, nil
 }
-
-//go:embed Logo.png
-var logoBytes []byte
+*/

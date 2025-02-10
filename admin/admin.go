@@ -6,7 +6,6 @@ import(
 	"io"
 	"log"
 	"time"
-	"embed"
 	"context"
 	"net/http"
 	
@@ -45,7 +44,7 @@ func NewAdmin() *Admin {
 //Manage
 func (a *Admin) LaunchServer() {
 	a.Status = "Running"
-	a.router.ServeFiles("/static/*filepath", http.Dir("./admin/html/static"))
+	a.router.ServeFiles("/static/*filepath", http.Dir("admin/html/static"))
 	a.Server = startHTTPServer(a.router)
 }
 
@@ -160,7 +159,3 @@ func (a *Admin) ServerAction(server string, action string) error {
 func (a *Admin) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Write([]byte(a.GetStatus()))
 }
-
-//Embed
-//go:embed html/*
-var HTMLFiles embed.FS

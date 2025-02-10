@@ -3,8 +3,13 @@ package admin
 import (
 	"os"
 	"log"
+	"embed"
 	"net/http"
 )
+
+//Embed
+//go:embed html/*
+var HTMLFiles embed.FS
 
 func GetServerURL(server string) string {
 	var url string

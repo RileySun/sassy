@@ -4,6 +4,8 @@ go 1.22.4
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/joho/godotenv v1.5.1
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/signintech/gopdf v0.29.2
 	github.com/vicanso/go-charts/v2 v2.6.10
 )

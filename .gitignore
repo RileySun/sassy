@@ -1,7 +1,6 @@
 .DS_Store
 /RAW
-/api/assets
-/auth/assets
+/api/assets/*
 TODO.txt
 Report.pdf
 *.env

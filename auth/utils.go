@@ -23,7 +23,8 @@ type Credentials struct {
 func LoadCredentials() *Credentials {
 	envErr := godotenv.Load()
 	if envErr != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Auth: Error loading .env file - ", envErr)
+		log.Println("This may be caused by running in docker")
 	}
 	
 	creds := &Credentials{

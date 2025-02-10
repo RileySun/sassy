@@ -1,3 +1,4 @@
+--Create
 CREATE TABLE `Images` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `model_id` int(11) DEFAULT NULL,
@@ -20,3 +21,5 @@ CREATE TABLE `Videos` (
   `desc` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+--Add Base Data
