@@ -25,3 +25,29 @@ services:
             - '9090:9090'
         volumes:
             - .:/app
+        networks:
+            - sassy-network
+
+    api:
+        image: "mysql:latest"
+        restart: always
+        env_file: "./.env"
+        container_name: 'sassy-api-db'
+        environment:
+            MYSQL_ROOT_PASSWORD: ${API_DB_PASS}
+            MYSQL_DATABASE: ${API_DB_DATABASE}
+            MYSQL_USER: ${API_DB_USER}
+            MYSQL_PASSWORD: ${API_DB_PASS}
+        healthcheck:
+            test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        ports:
+            - '3306:3305'
+        networks: 
+            - sassy-network
+            
+networks:
+    sassy-network:
+        external: true
