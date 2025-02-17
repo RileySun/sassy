@@ -19,7 +19,7 @@ type Session struct {
 
 func (a *Admin) NewSession(w http.ResponseWriter, user string) {
 	token := uuid.NewString()
-	expiration := time.Now().Add(120 * time.Second)
+	expiration := time.Now().Add(1200 * time.Second)
 	a.Sessions[token] = &Session{
 		user: user,
 		expires: expiration,
@@ -33,7 +33,17 @@ func (a *Admin) NewSession(w http.ResponseWriter, user string) {
 }
 
 func (s *Session) isExpired() bool {
-	return s.expires.Before(time.Now())
+	expired := s.expires.Before(time.Now())
+	return expired
+}
+
+func (a *Admin) removeSession(token string) {
+	for _, s := range a.Sessions {
+		if s == a.Sessions[token] {
+			delete(a.Sessions, token);
+			return
+		}
+	}
 }
 
 //LoadLogin
@@ -61,7 +71,11 @@ func (a Admin) CheckSession(r *http.Request) error {
 	}
 	
 	if session.isExpired() {
+		a.removeSession(token)
 		return errors.New("Expired Session Token")
+	} else {
+		//Add extra time due to success check
+		a.Sessions[token].expires = time.Now().Add(1200 * time.Second)
 	}
 	
 	return nil
@@ -89,4 +103,16 @@ func (a *Admin) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		//Show Popup
 		tmpl.Execute(w, true)
 	}
+}
+
+//Logout
+func (a *Admin) Logout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//If session, delete session
+	c, cookieErr := r.Cookie("session_token")
+	if cookieErr == nil {
+		token := c.Value
+		a.removeSession(token)
+	}
+	
+	http.Redirect(w, r, "/login" + a.Redirect, http.StatusFound)
 }

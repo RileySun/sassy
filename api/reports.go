@@ -167,25 +167,25 @@ func (r *Report) getTopUsers() (*User, *User, *User, *User, *User) {
 	
 	//Get Top Get by sorting
 	sort.Slice(usersClone, func(i, j int) bool {
-		return usersClone[i].Get < usersClone[j].Get
+		return usersClone[i].Get > usersClone[j].Get
 	})
 	topGet = usersClone[0]
 	
 	//Get Top Add by sorting
 	sort.Slice(usersClone, func(i, j int) bool {
-		return usersClone[i].Add < usersClone[j].Add
+		return usersClone[i].Add > usersClone[j].Add
 	})
 	topAdd = usersClone[0]
 	
 	//Get Top Update by sorting
 	sort.Slice(usersClone, func(i, j int) bool {
-		return usersClone[i].Update < usersClone[j].Update
+		return usersClone[i].Update > usersClone[j].Update
 	})
 	topUpdate = usersClone[0]
 	
 	//Get Top Delete by sorting
 	sort.Slice(usersClone, func(i, j int) bool {
-		return usersClone[i].Delete < usersClone[j].Delete
+		return usersClone[i].Delete > usersClone[j].Delete
 	})
 	topDelete = usersClone[0]
 	

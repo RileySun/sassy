@@ -49,9 +49,10 @@ func (a *Admin) LaunchServer() {
 }
 
 func (a *Admin) LoadRoutes() {	
-	//Login
+	//Login/Logout
 	a.router.GET("/login", a.LoadLogin)
 	a.router.POST("/login", a.Login)
+	a.router.GET("/logout", a.Logout)
 	
 	//Home
 	a.router.GET("/", a.LoadHome)

@@ -1,5 +1,26 @@
 body, html {background:#262626; font-family:Helvetica; margin:0; position:relative; width:100vw}
 
+.Logout {
+	position: absolute;
+	top: 1.5%;
+	right: 2%;
+	width: 9%;
+	margin: 0;
+	padding: 1% 0;
+	background: #1d2d3a;
+	color: #E9E9E9;
+	text-align: center;
+	font-size: 1.5vw;
+	text-decoration: none !important;
+	border-radius: 1.2vw;
+	cursor: pointer;
+	transition: all 0.5s ease-in;
+}
+.Logout:hover {
+	background: #1e252e;
+	color: #697d9b;
+}
+
 .Menu {
 	display: block;
 	width: 60%;
@@ -87,13 +108,13 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 }
 .Tab-Item-Label {
 	display: inline-block;
-	width: 76%;
+	width: 58%;
 	padding: 0 0 0 3%;
 	vertical-align: middle;
 }
 .Tab-Item-Value {
 	display: inline-block;
-	width: 17%;
+	width: 36%;
 	padding: 0 3% 0 0;
 	text-align: right;
 	vertical-align: middle;
