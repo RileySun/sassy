@@ -72,7 +72,13 @@
 				}
 				
 				//Sort
-				let sorted = cells.sort(sorter);
+				let sorted = [];
+				if (sortKey != "Name" && sortKey != "Trial") {
+					sorted = cells.sort(numericalSorter);
+				}
+				else {
+					sorted = cells.sort(alphaSorter);
+				}
 				if (!ACS) {
 					sorted.reverse()
 				}
@@ -81,10 +87,18 @@
 				document.getElementById('Table').innerHTML = "";
 				sorted.forEach(e => document.getElementById('Table').appendChild(e));
 			}	
-			function sorter(a, b) {
+			function alphaSorter(a, b) {
 				let aKey = a.querySelector('[data-sort="' + sortKey + '"]').innerHTML;
 				let bKey = b.querySelector('[data-sort="' + sortKey + '"]').innerHTML;
 				return aKey.localeCompare(bKey);
+			}
+			
+			function numericalSorter(a, b) {
+				let aKey = a.querySelector('[data-sort="' + sortKey + '"]').innerHTML;
+				let bKey = b.querySelector('[data-sort="' + sortKey + '"]').innerHTML;
+				aKey = Number(aKey)
+				bKey = Number(bKey)
+				return aKey > bKey;
 			}
 			
 			//Search

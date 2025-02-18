@@ -200,14 +200,13 @@ func (r *Report) getRevenue() (float64, float64, float64, float64, float64, floa
 	rawAdd := float64(r.Add) * TRANSACTION_COST
 	rawUpdate := float64(r.Update) * TRANSACTION_COST
 	rawDelete := float64(r.Delete) * TRANSACTION_COST
-	rawAvg := rawAll/float64(userCount)
 	
 	revAll := math.Floor(rawAll * 10000) / 10000
 	revGet := math.Floor(rawGet * 10000) / 10000
 	revAdd := math.Floor(rawAdd * 10000) / 10000
 	revUpdate := math.Floor(rawUpdate * 10000) / 10000
 	revDelete := math.Floor(rawDelete * 10000) / 10000
-	revAvg := math.Floor(rawAvg * 10000) / 10000
+	revAvg := revAll/float64(userCount)
 	
 	
 	return revAll, revGet, revAdd, revUpdate, revDelete, revAvg
@@ -471,8 +470,16 @@ func (r *Report) TopUserTable() {
 	table.AddColumn("UPDATE", 60, "right")
 	table.AddColumn("DELETE", 60, "right")
 	
+	//Username length check
+	names := []string{r.TopAll.Name, r.TopGet.Name, r.TopAdd.Name, r.TopUpdate.Name, r.TopDelete.Name}
+	for i, n := range names {
+		if len(n) > 7 {
+			names[i] = n[0:8]
+		}
+	}
+	
 	//Rows
-	table.AddRow([]string{r.TopAll.Name, r.TopGet.Name, r.TopAdd.Name, r.TopUpdate.Name, r.TopDelete.Name})
+	table.AddRow(names)
 	topAll := r.TopAll.Get + r.TopAll.Add + r.TopAll.Update + r.TopAll.Delete
 	t, g, a, u, d := strconv.Itoa(topAll), strconv.Itoa(r.TopGet.Get), strconv.Itoa(r.TopAdd.Add), strconv.Itoa(r.TopUpdate.Update), strconv.Itoa(r.TopUpdate.Delete)
 	table.AddRow([]string{t, g, a, u, d})
