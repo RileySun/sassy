@@ -5,7 +5,18 @@ import (
 	"log"
 	"embed"
 	"net/http"
+	
+	"github.com/joho/godotenv"
 )
+
+
+func init() {
+	envErr := godotenv.Load()
+	if envErr != nil {
+		log.Println("API: Error loading .env file - ", envErr)
+		log.Println("This may be caused by running in docker")
+	}
+}
 
 //Embed
 //go:embed html/*

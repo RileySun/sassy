@@ -1,0 +1,24 @@
+GO_ENV=production
+
+#API Database Credentials
+API_DB_HOST=
+API_DB_PORT=
+API_DB_USER=
+API_DB_PASS=
+API_DB_DATABASE=
+
+#Auth Database Credentials
+AUTH_DB_HOST=
+AUTH_DB_PORT=
+AUTH_DB_USER=
+AUTH_DB_PASS=
+AUTH_DB_DATABASE=
+
+#Admin Website Default Password
+ADMIN_USER="janeD"
+ADMIN_PASS="prW4nj7KL"
+
+#Output URL's for Services (Can change as you need to)
+API_URL="http://localhost:7070"
+AUTH_URL="http://localhost:8080"
+ADMIN_URL="http://localhost:9090"

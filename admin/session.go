@@ -1,6 +1,7 @@
 package admin
 
 import(
+	"os"
 	"log"
 	"time"
 	"errors"
@@ -88,7 +89,10 @@ func (a *Admin) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 	pass := r.PostFormValue("pass")
 	
 	//Fake it for now, we gonna hook an auth db to this
-	if user == "janeD" && pass == "prW4nj7KL" {
+	adminUser := os.Getenv("ADMIN_USER")
+	adminPass := os.Getenv("ADMIN_PASS")
+	log.Println(adminUser, adminPass)
+	if user == adminUser && pass == adminPass {
 		a.NewSession(w, user)
 		
 		http.Redirect(w, r, "/" + a.Redirect, http.StatusFound)		
