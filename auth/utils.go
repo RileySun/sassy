@@ -39,6 +39,12 @@ func LoadCredentials() *Credentials {
 }
 
 func GetServerURL(server string) string {
+	envErr := godotenv.Load()
+	if envErr != nil {
+		log.Println("Auth: Error loading .env file - ", envErr)
+		log.Println("This may be caused by running in docker")
+	}
+	
 	var url string
 	switch server {
 		case "API":

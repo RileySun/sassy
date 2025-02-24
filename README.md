@@ -51,4 +51,5 @@ The Authentication Server is capable of Checking Authorizations of Access Tokens
 
 Included in sassy is an administrative website for tracking usage and generating reports.  
 By default the address for this site is "http://localhost:9090" but can be changed in the ".env" file  
-The login to the site uses the "ADMIN\_USER" & "ADMIN\_PASS" values stored in the ".env" file
+The root login to the site uses the "ADMIN\_USER" & "ADMIN\_PASS" values stored in the ".env" file
+You can also login to the site using any Authentication Server user which has the role 'Admin' in the database

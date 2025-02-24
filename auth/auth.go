@@ -10,16 +10,11 @@ import(
 	"github.com/google/uuid"
 	
 	"golang.org/x/crypto/bcrypt"
-	
-	//"fmt"
-	//"context"
-	//openbao "github.com/openbao/openbao/api/v2"
 )
 
 //Struct
 type Auth struct {
 	db *Database
-	//baoClient *openbao.Client
 }
 
 type Token struct {
@@ -157,6 +152,11 @@ func (a *Auth) GetUserIdFromToken(accessToken string) int {
 	return userID
 }
 
+func (a *Auth) IsUserAdmin(userID int) error {
+	
+	return nil
+}
+
 func (t *Token) Access() string {
 	return t.access
 } //Returns access token
@@ -250,6 +250,26 @@ func (a *Auth) CheckLogin(name string, password string) error {
 	}
 }
 
+func (a *Auth) CheckAdminLogin(name string, password string) error {
+	//Get Data
+	user := struct {
+		Name string 
+		Pass string
+	}{}
+	row := a.db.db.QueryRow("SELECT `name`, `pass` FROM Users WHERE `name` = ? AND `role` = 'Admin';", name)
+	scanErr := row.Scan(&user.Name, &user.Pass)
+	if scanErr != nil {
+		return errors.New("Invalid Login Information")
+	}
+	
+	//Check for correct password
+	if a.CheckPassword(user.Pass, password) {
+		return nil
+	} else {
+		return errors.New("Invalid Login Information")
+	}
+}
+
 func (a *Auth) HashPassword(password string) (string, error) {
 	bytes := []byte(password)
 	hasedBytes, err := bcrypt.GenerateFromPassword(bytes, bcrypt.MinCost)
@@ -270,45 +290,3 @@ func (a *Auth) checkColumnName(column string) error {
 		return errors.New("Disallowed column name, NO SQL INJECTIONS!")
 	}
 }
-
-/* Not sure what we are using this for yet.
-//Secret Storage (using openbau)
-func (a *Auth) NewSecretManager() error {
-	//Credentials
-	creds := LoadCredentials()	
-	
-	//Openbao
-	config := openbao.DefaultConfig()
-	config.Address = creds.OHost
-	
-	var baoErr error
-	a.baoClient, baoErr = openbao.NewClient(config)
-	if baoErr != nil {
-	    return baoErr
-	}
-	
-	a.baoClient.SetToken(creds.OToken)
-	
-	return nil
-}
-
-func (a *Auth) AddSecret(secretData map[string]interface{}, secretPassword string) error {
-	_, err := a.baoClient.KVv2("secret").Put(context.Background(), secretPassword, secretData)
-	return err
-}
-
-func (a *Auth) GetSecret(secretPassword string) (string, error) {
-	secret, err := a.baoClient.KVv2("secret").Get(context.Background(), secretPassword)
-	if err != nil {
-    	return "", err
-	}
-	
-	value, ok := secret.Data["Key"].(string)
-	if !ok {
-		err = errors.New(fmt.Sprintf("Type Assert Error: %T %#v", secret.Data["Key"], secret.Data["Key"]))
-		return "", err
-	}
-	
-	return value, nil
-}
-*/

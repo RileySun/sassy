@@ -1,12 +1,17 @@
 package admin
 
 import(
+	"io"
 	"os"
 	"log"
 	"time"
 	"errors"
+	"strconv"
+	"strings"
 	"net/http"
 	"html/template"
+	
+	URL "net/url"
 	
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
@@ -88,24 +93,80 @@ func (a *Admin) Login(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 	user := r.PostFormValue("user")
 	pass := r.PostFormValue("pass")
 	
-	//Fake it for now, we gonna hook an auth db to this
+	//First check admin root user/password
 	adminUser := os.Getenv("ADMIN_USER")
 	adminPass := os.Getenv("ADMIN_PASS")
-	log.Println(adminUser, adminPass)
 	if user == adminUser && pass == adminPass {
 		a.NewSession(w, user)
 		
 		http.Redirect(w, r, "/" + a.Redirect, http.StatusFound)		
 		a.Redirect = ""
-	} else {
-		//Reload Login Page
-		tmpl, parseErr := template.ParseFS(HTMLFiles, "html/login.html")
-		if parseErr != nil {
-			log.Println("Session->Login->Error: ", parseErr)
-		}
+		return
+	}
+	
+	//Then check auth server DB user/password
+	loginErr := a.CheckAdminLogin(user, pass)
+	if loginErr == nil {
+		a.NewSession(w, user)
 		
-		//Show Popup
-		tmpl.Execute(w, true)
+		http.Redirect(w, r, "/" + a.Redirect, http.StatusFound)		
+		a.Redirect = ""
+		return
+	}
+	
+	//If none of those work Login failed, Reload Login Page
+	tmpl, parseErr := template.ParseFS(HTMLFiles, "html/login.html")
+	if parseErr != nil {
+		log.Println("Session->Login->Error: ", parseErr)
+	}
+	
+	//Show Popup
+	tmpl.Execute(w, true)
+}
+
+func (a *Admin) CheckAdminLogin(user, pass string) error {
+	//Create Request
+	client := &http.Client{}
+	url := GetServerURL("Auth") + "/admin"
+	req, reqErr := http.NewRequest("POST", url, nil)
+	if reqErr != nil {
+		log.Println("Admin->CheckAdminLogin->Req: ", reqErr)
+		return reqErr
+	}
+	
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	
+	form := URL.Values{}
+	form.Add("user", user)
+	form.Add("pass", pass)
+	req.Body = io.NopCloser(strings.NewReader(form.Encode()))
+	
+	//Do Request
+	resp, getErr := client.Do(req)
+	defer resp.Body.Close()
+	if getErr != nil {
+		log.Println("Admin->CheckAdminLogin->Get: ", getErr)
+		return getErr
+	}
+	
+	//Read Body
+	body, bodyErr := io.ReadAll(resp.Body)
+	if bodyErr != nil {
+		log.Println("Admin->CheckAdminLogin->Body: ", bodyErr)
+		return bodyErr
+	}
+	
+	//Parse User ID
+	answer, parseErr := strconv.Atoi(string(body[:]))
+	if parseErr != nil {
+		log.Println("Admin->CheckAdminLogin->Parse", parseErr)
+		return parseErr
+	}
+	
+	if answer == 1 {
+		return nil
+	} else {
+		return errors.New("Invalid Auth DB User/Pass")
 	}
 }
 

@@ -43,6 +43,7 @@ func (s *AuthServer) LoadRoutes() {
 	//Auth
 	s.router.GET("/check", s.CheckAuthentication)
 	s.router.POST("/token/generate", s.GenerateAccessToken)
+	s.router.POST("/admin", s.CheckAdminLogin)
 	
 	//Status
 	s.router.GET("/status", s.CheckStatus)
@@ -143,6 +144,20 @@ func (s *AuthServer) GenerateAccessToken(w http.ResponseWriter, r *http.Request,
 		w.Write([]byte(tokenErr.Error()))
 	}
 	w.Write([]byte(accessToken))
+}
+
+func (s *AuthServer) CheckAdminLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.ParseForm()
+	user := r.PostFormValue("user")
+	pass := r.PostFormValue("pass")
+	
+	loginErr := s.Auth.CheckAdminLogin(user, pass)
+	if loginErr != nil {
+		w.Write([]byte("0"))
+		return
+	}
+	
+	w.Write([]byte("1"))
 }
 
 func (s *AuthServer) CheckStatus(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
